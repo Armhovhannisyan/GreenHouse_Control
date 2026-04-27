@@ -1,0 +1,83 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GreenCtrl — Weather Reports</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/charts.css" />
+  <link rel="stylesheet" href="css/weather-reports.css" />
+</head>
+<body>
+  <header id="app-header"></header>
+
+  <div class="layout">
+    <aside id="app-sidebar"></aside>
+
+    <main id="app-main">
+      <div class="page-header">weather reports</div>
+      <div class="status-bar" id="weatherStatusBar"></div>
+      <div class="weather-page-wrap">
+        <div class="weather-chart-card">
+          <div class="weather-chart-head">
+            <div class="weather-chart-head-left">
+              <div class="weather-chart-title weather-chart-toggle-title" id="weatherChartToggleTitle" role="button" tabindex="0" aria-expanded="true">
+                Outside weather chart
+              </div>
+              <div class="chart-timesel" id="weatherRangeSel">
+                <button class="ts-btn active" data-range="6">6h</button>
+                <button class="ts-btn" data-range="24">24h</button>
+                <button class="ts-btn" data-range="72">3D</button>
+              </div>
+            </div>
+            <div class="weather-chart-controls">
+              <!-- Filter dropdown removed; use quick-analysis color toggles -->
+            </div>
+          </div>
+          <div class="weather-chart-canvas-wrap" id="weatherChartBody">
+            <div class="weather-chart-layout">
+              <div class="weather-chart-main">
+                <canvas id="weatherSingleChart"></canvas>
+              </div>
+              <aside class="quick-analysis">
+                <div class="quick-analysis-head">
+                  <span class="quick-analysis-toggle" id="qaToggleAllLabel" role="button" tabindex="0">Quick analysis</span>
+                  <div class="quick-analysis-actions">
+                    <span class="quick-analysis-time" id="quickAnalysisTime">Latest</span>
+                  </div>
+                </div>
+                <div id="quickAnalysisList"></div>
+              </aside>
+            </div>
+          </div>
+        </div>
+        <div class="weather-report-block">
+          <div class="weather-report-title weather-report-toggle-title" data-report-toggle="status" role="button" tabindex="0" aria-expanded="true">Status</div>
+          <div class="weather-report-body" id="reportBody-status">
+            <div class="weather-status-grid" id="weatherStatusGrid"></div>
+          </div>
+        </div>
+        <div id="weatherReportsRoot"></div>
+        <div class="weather-report-block">
+          <div class="weather-report-title weather-report-toggle-title" data-report-toggle="configuration" role="button" tabindex="0" aria-expanded="true">Configuration</div>
+          <div class="weather-report-body" id="reportBody-configuration">
+            <div id="weatherConfigRoot"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/utils/helpers.js"></script>
+  <script src="js/utils/logger.js"></script>
+  <script src="js/components/header.js"></script>
+  <script src="js/components/sidebar.js"></script>
+  <script src="js/pages/weather-reports.js"></script>
+</body>
+</html>

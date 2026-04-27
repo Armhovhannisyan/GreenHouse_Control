@@ -1,0 +1,125 @@
+.climate-sidebar {
+  width: 160px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 16px 0;
+  flex-shrink: 0;
+}
+
+.climate-sidebar a {
+  display: block;
+  padding: 8px 20px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  border-left: 3px solid transparent;
+}
+
+.climate-sidebar a.active {
+  color: var(--teal);
+  font-weight: 600;
+  border-left-color: var(--teal);
+  background: #f0f8f6;
+}
+
+.climate-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 12px;
+  padding: 16px;
+}
+
+.climate-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  min-height: 176px;
+  padding: 10px;
+  transition: box-shadow .2s, transform .2s;
+}
+
+.climate-box.clickable {
+  cursor: pointer;
+}
+
+.climate-box.clickable:hover {
+  box-shadow: 0 6px 24px rgba(13,43,62,.12);
+  transform: translateY(-1px);
+}
+
+.climate-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+}
+
+.climate-value-panel {
+  background: #f4f8fa;
+  border: 1px solid #e6edf2;
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  color: #334f5d;
+  margin-bottom: 10px;
+}
+
+.climate-gauge-wrap {
+  margin-bottom: 8px;
+}
+
+.climate-gauge-wrap .gauge-wrap {
+  margin-bottom: 6px;
+}
+
+.climate-gauge-wrap .gauge-svg {
+  width: 134px;
+  height: 76px;
+}
+
+.climate-gauge-wrap .gauge-value {
+  font-size: 20px;
+}
+
+.climate-gauge-wrap .gauge-unit {
+  font-size: 10px;
+}
+
+.climate-unit {
+  font-size: 18px;
+  margin-left: 2px;
+}
+
+.climate-kv {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.climate-kv b {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.climate-section-wrap {
+  padding: 16px;
+}
+
+.climate-section-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.climate-section-title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.climate-section-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}

@@ -1,0 +1,39 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GreenCtrl — Climate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/climate.css" />
+</head>
+<body>
+  <header id="app-header"></header>
+
+  <div class="layout">
+    <aside class="climate-sidebar">
+      <a class="active" href="climate.html">Climate</a>
+      <a href="index.html">Irrigation</a>
+    </aside>
+
+    <main id="app-main">
+      <div class="page-header">climate</div>
+      <div class="status-bar" id="climateStatusBar"></div>
+      <div class="climate-grid" id="climateGrid"></div>
+    </main>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/utils/gauge.js"></script>
+  <script src="js/utils/helpers.js"></script>
+  <script src="js/utils/logger.js"></script>
+  <script src="js/components/header.js"></script>
+  <script src="js/api/weather.js"></script>
+  <script src="js/api/sensors.js"></script>
+  <script src="js/pages/climate.js"></script>
+</body>
+</html>

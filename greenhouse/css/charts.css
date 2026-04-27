@@ -1,0 +1,54 @@
+/* ── css/charts.css — chart section styles ── */
+
+.chart-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  padding: 0 28px 28px;
+}
+
+@media (max-width: 900px) {
+  .chart-row { grid-template-columns: 1fr; }
+}
+
+.chart-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 20px;
+  box-shadow: var(--card-shadow);
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chart-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.chart-timesel { display: flex; gap: 4px; }
+.ts-btn {
+  border: 1px solid var(--border);
+  background: none;
+  border-radius: 5px;
+  padding: 3px 9px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-family: var(--font);
+  transition: all .15s;
+}
+.ts-btn:hover, .ts-btn.active {
+  background: var(--teal);
+  color: #fff;
+  border-color: var(--teal);
+}
+
+canvas { width: 100% !important; }

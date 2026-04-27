@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GreenCtrl — Register</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/auth.css" />
+</head>
+<body>
+  <main class="auth-wrap">
+    <section class="auth-card">
+      <h1>Create account</h1>
+      <p class="auth-sub">Register a new greenhouse operator user.</p>
+      <form id="registerForm" class="auth-form">
+        <label>
+          Username
+          <input type="text" id="username" autocomplete="username" required />
+        </label>
+        <label>
+          Password (min 6 chars)
+          <input type="password" id="password" autocomplete="new-password" minlength="6" required />
+        </label>
+        <button type="submit">Register</button>
+      </form>
+      <p class="auth-msg" id="authMsg"></p>
+      <p class="auth-link">Already have account? <a href="login.html">Login</a></p>
+    </section>
+  </main>
+  <script src="js/config.js"></script>
+  <script src="js/pages/auth-register.js"></script>
+</body>
+</html>

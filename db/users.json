@@ -1,0 +1,25 @@
+{
+  "users": [
+    {
+      "id": "5899bcd243b56e34",
+      "username": "grower",
+      "passwordHash": "8dd7b8ffea5c4e99d8cf585b8f2f985f24395fee3db286c8b3596d2d1e2e06abfa9e1c07f94783491588ae998110b8fbff88db4bbfb27f5f2c8256bd55c1ecfb",
+      "salt": "52fd09ea5093cca8acbb661adbffd6b9",
+      "createdAt": "2026-04-26T13:32:11.109Z"
+    },
+    {
+      "id": "02e1cb2aa7930290",
+      "username": "ani salmasian",
+      "passwordHash": "d9bc4dc160510e18dc4a6df700a1fb6b65e66088c6814563bbf06b5fa7de5fa4afe89add61a2dcd8f5904f1dc99787bd3f7c5f8c83eaf586ebb01c3f030e4d3d",
+      "salt": "91d301e350dd0b827f072b5576a12b8b",
+      "createdAt": "2026-04-26T13:39:20.828Z"
+    },
+    {
+      "id": "cf5fb25b75d796c5",
+      "username": "zargaryandavid@yahoo.com",
+      "passwordHash": "f3d082fb729433f237f47a9b9672037a726dc73ee7207ba42ce760c0c0a6e3e16762fedf2a26f50c52165e0f483b70658bfebe8ebe31f85ddc52224bbc40e20b",
+      "salt": "300b3cb7b6b723b84b38ac21caef99cf",
+      "createdAt": "2026-04-26T14:45:16.712Z"
+    }
+  ]
+}

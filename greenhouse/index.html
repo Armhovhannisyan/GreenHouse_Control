@@ -1,0 +1,58 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script>
+    // Opening "/greenhouse" (without trailing slash) makes relative CSS/JS
+    // resolve incorrectly in static servers. Normalize to "/greenhouse/".
+    if (window.location.pathname === '/greenhouse') {
+      window.location.replace('/greenhouse/');
+    }
+  </script>
+  <title>GreenCtrl — Greenhouse Operator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+</head>
+<body>
+
+  <!-- ── HEADER ── -->
+  <header id="app-header"></header>
+
+  <div class="layout">
+    <!-- ── SIDEBAR ── -->
+    <aside id="app-sidebar"></aside>
+
+    <!-- ── MAIN ── -->
+    <main id="app-main">
+      <div class="status-bar" id="statusBar"></div>
+
+      <div class="actions-bar" id="actionsBar"></div>
+      <div class="last-updated">Last updated: <span id="lastUpdated">—</span></div>
+
+      <!-- Zone cards -->
+      <div class="cards-grid" id="cardsGrid"></div>
+
+      <!-- Alerts -->
+      <div class="section-title">🔔 Recent alerts</div>
+      <div class="alerts-section" id="alertsList"></div>
+    </main>
+  </div>
+
+  <!-- App modules (order matters) -->
+  <script src="js/config.js"></script>
+  <script src="js/utils/gauge.js"></script>
+  <script src="js/utils/helpers.js"></script>
+  <script src="js/utils/logger.js"></script>
+  <script src="js/api/weather.js"></script>
+  <script src="js/api/sensors.js"></script>
+  <script src="js/components/header.js"></script>
+  <script src="js/components/sidebar.js"></script>
+  <script src="js/components/cards.js"></script>
+  <script src="js/components/alerts.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
