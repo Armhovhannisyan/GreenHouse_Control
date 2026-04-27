@@ -1619,3 +1619,111 @@
 {"ts":"2026-04-27T16:45:18.155Z","level":"info","message":"[http] request","details":{"method":"OPTIONS","pathname":"/api/weather/current","query":{}}}
 {"ts":"2026-04-27T16:45:18.164Z","level":"info","message":"[http] request","details":{"method":"GET","pathname":"/api/weather/current","query":{}}}
 {"ts":"2026-04-27T16:45:35.728Z","level":"info","message":"[poll] saved observation","details":{"obsTimeUtc":"2026-04-27T16:45:31Z","temp":9,"humidity":78,"wind":0}}
+{"ts":"2026-04-27T16:46:05.703Z","level":"info","message":"[poll] duplicate skipped","details":{"obsTimeUtc":"2026-04-27T16:45:31Z"}}
+{"ts":"2026-04-27T16:46:18.162Z","level":"info","message":"[http] request","details":{"method":"OPTIONS","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T16:46:18.169Z","level":"info","message":"[http] request","details":{"method":"GET","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T16:46:35.767Z","level":"info","message":"[poll] duplicate skipped","details":{"obsTimeUtc":"2026-04-27T16:45:31Z"}}
+{"ts":"2026-04-27T16:47:05.685Z","level":"info","message":"[poll] saved observation","details":{"obsTimeUtc":"2026-04-27T16:46:36Z","temp":10,"humidity":78,"wind":0}}
+{"ts":"2026-04-27T16:47:18.165Z","level":"info","message":"[http] request","details":{"method":"OPTIONS","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T16:47:18.170Z","level":"info","message":"[http] request","details":{"method":"GET","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T16:47:35.695Z","level":"info","message":"[poll] duplicate skipped","details":{"obsTimeUtc":"2026-04-27T16:46:36Z"}}
+{"ts":"2026-04-27T16:48:05.733Z","level":"info","message":"[poll] saved observation","details":{"obsTimeUtc":"2026-04-27T16:47:41Z","temp":9,"humidity":79,"wind":0}}
+{"ts":"2026-04-27T16:48:18.169Z","level":"info","message":"[http] request","details":{"method":"OPTIONS","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T16:48:18.182Z","level":"info","message":"[http] request","details":{"method":"GET","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T16:48:35.867Z","level":"info","message":"[poll] duplicate skipped","details":{"obsTimeUtc":"2026-04-27T16:47:41Z"}}
+{"ts":"2026-04-27T16:49:05.619Z","level":"info","message":"[poll] saved observation","details":{"obsTimeUtc":"2026-04-27T16:48:46Z","temp":9,"humidity":78,"wind":0}}
+{"ts":"2026-04-27T16:49:18.163Z","level":"info","message":"[http] request","details":{"method":"OPTIONS","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T16:49:18.170Z","level":"info","message":"[http] request","details":{"method":"GET","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T16:49:35.713Z","level":"info","message":"[poll] duplicate skipped","details":{"obsTimeUtc":"2026-04-27T16:48:46Z"}}
+{"ts":"2026-04-27T16:50:05.723Z","level":"info","message":"[poll] saved observation","details":{"obsTimeUtc":"2026-04-27T16:49:52Z","temp":9,"humidity":78,"wind":0}}
+{"ts":"2026-04-27T16:50:18.155Z","level":"info","message":"[http] request","details":{"method":"OPTIONS","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T16:50:18.163Z","level":"info","message":"[http] request","details":{"method":"GET","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T16:50:35.691Z","level":"info","message":"[poll] duplicate skipped","details":{"obsTimeUtc":"2026-04-27T16:49:52Z"}}
+{"ts":"2026-04-27T16:51:05.904Z","level":"info","message":"[poll] saved observation","details":{"obsTimeUtc":"2026-04-27T16:50:57Z","temp":9,"humidity":79,"wind":0}}
+{"ts":"2026-04-27T16:51:18.162Z","level":"info","message":"[http] request","details":{"method":"OPTIONS","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T16:51:18.168Z","level":"info","message":"[http] request","details":{"method":"GET","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T16:51:35.712Z","level":"info","message":"[poll] duplicate skipped","details":{"obsTimeUtc":"2026-04-27T16:50:57Z"}}
+{"ts":"2026-04-27T16:52:05.738Z","level":"info","message":"[poll] saved observation","details":{"obsTimeUtc":"2026-04-27T16:52:02Z","temp":9,"humidity":79,"wind":0}}
+{"ts":"2026-04-27T16:52:18.170Z","level":"info","message":"[http] request","details":{"method":"OPTIONS","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T16:52:18.176Z","level":"info","message":"[http] request","details":{"method":"GET","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T16:52:35.755Z","level":"info","message":"[poll] duplicate skipped","details":{"obsTimeUtc":"2026-04-27T16:52:02Z"}}
+{"ts":"2026-04-27T16:53:05.904Z","level":"info","message":"[poll] duplicate skipped","details":{"obsTimeUtc":"2026-04-27T16:52:02Z"}}
+{"ts":"2026-04-27T16:53:18.154Z","level":"info","message":"[http] request","details":{"method":"OPTIONS","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T16:53:18.160Z","level":"info","message":"[http] request","details":{"method":"GET","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T16:53:35.984Z","level":"info","message":"[poll] saved observation","details":{"obsTimeUtc":"2026-04-27T16:53:07Z","temp":9,"humidity":80,"wind":0}}
+{"ts":"2026-04-27T16:54:05.811Z","level":"info","message":"[poll] duplicate skipped","details":{"obsTimeUtc":"2026-04-27T16:53:07Z"}}
+{"ts":"2026-04-27T16:54:18.172Z","level":"info","message":"[http] request","details":{"method":"OPTIONS","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T16:54:18.180Z","level":"info","message":"[http] request","details":{"method":"GET","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T16:54:35.825Z","level":"info","message":"[poll] saved observation","details":{"obsTimeUtc":"2026-04-27T16:54:16Z","temp":9,"humidity":80,"wind":0}}
+{"ts":"2026-04-27T16:55:06.038Z","level":"info","message":"[poll] duplicate skipped","details":{"obsTimeUtc":"2026-04-27T16:54:16Z"}}
+{"ts":"2026-04-27T16:55:18.165Z","level":"info","message":"[http] request","details":{"method":"OPTIONS","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T16:55:18.168Z","level":"info","message":"[http] request","details":{"method":"GET","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T16:55:35.888Z","level":"info","message":"[poll] saved observation","details":{"obsTimeUtc":"2026-04-27T16:55:21Z","temp":9,"humidity":80,"wind":0}}
+{"ts":"2026-04-27T16:56:05.925Z","level":"info","message":"[poll] duplicate skipped","details":{"obsTimeUtc":"2026-04-27T16:55:21Z"}}
+{"ts":"2026-04-27T16:56:18.160Z","level":"info","message":"[http] request","details":{"method":"OPTIONS","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T16:56:18.165Z","level":"info","message":"[http] request","details":{"method":"GET","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T16:56:35.972Z","level":"info","message":"[poll] saved observation","details":{"obsTimeUtc":"2026-04-27T16:56:26Z","temp":9,"humidity":79,"wind":0}}
+{"ts":"2026-04-27T16:57:05.508Z","level":"error","message":"[poll] failed","details":"getaddrinfo ENOTFOUND api.weather.com"}
+{"ts":"2026-04-27T16:57:18.152Z","level":"info","message":"[http] request","details":{"method":"OPTIONS","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T16:57:18.162Z","level":"info","message":"[http] request","details":{"method":"GET","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T16:57:37.005Z","level":"info","message":"[poll] saved observation","details":{"obsTimeUtc":"2026-04-27T16:57:31Z","temp":9,"humidity":79,"wind":0}}
+{"ts":"2026-04-27T16:58:06.978Z","level":"info","message":"[poll] saved observation","details":{"obsTimeUtc":"2026-04-27T16:57:38Z","temp":9,"humidity":79,"wind":0}}
+{"ts":"2026-04-27T16:58:18.162Z","level":"info","message":"[http] request","details":{"method":"OPTIONS","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T16:58:18.173Z","level":"info","message":"[http] request","details":{"method":"GET","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T16:58:36.075Z","level":"info","message":"[poll] duplicate skipped","details":{"obsTimeUtc":"2026-04-27T16:57:38Z"}}
+{"ts":"2026-04-27T16:59:05.830Z","level":"info","message":"[poll] saved observation","details":{"obsTimeUtc":"2026-04-27T16:58:43Z","temp":9,"humidity":79,"wind":0}}
+{"ts":"2026-04-27T16:59:18.157Z","level":"info","message":"[http] request","details":{"method":"OPTIONS","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T16:59:18.162Z","level":"info","message":"[http] request","details":{"method":"GET","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T16:59:36.920Z","level":"info","message":"[poll] duplicate skipped","details":{"obsTimeUtc":"2026-04-27T16:58:43Z"}}
+{"ts":"2026-04-27T17:00:06.875Z","level":"info","message":"[poll] saved observation","details":{"obsTimeUtc":"2026-04-27T16:59:48Z","temp":9,"humidity":80,"wind":0}}
+{"ts":"2026-04-27T17:00:18.171Z","level":"info","message":"[http] request","details":{"method":"OPTIONS","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T17:00:18.177Z","level":"info","message":"[http] request","details":{"method":"GET","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T17:00:35.788Z","level":"info","message":"[poll] duplicate skipped","details":{"obsTimeUtc":"2026-04-27T16:59:48Z"}}
+{"ts":"2026-04-27T17:01:05.901Z","level":"info","message":"[poll] saved observation","details":{"obsTimeUtc":"2026-04-27T17:00:53Z","temp":9,"humidity":80,"wind":0}}
+{"ts":"2026-04-27T17:01:18.170Z","level":"info","message":"[http] request","details":{"method":"OPTIONS","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T17:01:18.178Z","level":"info","message":"[http] request","details":{"method":"GET","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T17:01:37.141Z","level":"info","message":"[poll] duplicate skipped","details":{"obsTimeUtc":"2026-04-27T17:00:53Z"}}
+{"ts":"2026-04-27T17:02:05.917Z","level":"info","message":"[poll] saved observation","details":{"obsTimeUtc":"2026-04-27T17:01:58Z","temp":9,"humidity":80,"wind":0}}
+{"ts":"2026-04-27T17:02:18.165Z","level":"info","message":"[http] request","details":{"method":"OPTIONS","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T17:02:18.169Z","level":"info","message":"[http] request","details":{"method":"GET","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T17:02:35.814Z","level":"info","message":"[poll] duplicate skipped","details":{"obsTimeUtc":"2026-04-27T17:01:58Z"}}
+{"ts":"2026-04-27T17:03:06.220Z","level":"info","message":"[poll] saved observation","details":{"obsTimeUtc":"2026-04-27T17:03:03Z","temp":9,"humidity":80,"wind":0}}
+{"ts":"2026-04-27T17:03:18.156Z","level":"info","message":"[http] request","details":{"method":"OPTIONS","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T17:03:18.160Z","level":"info","message":"[http] request","details":{"method":"GET","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T17:03:35.935Z","level":"info","message":"[poll] duplicate skipped","details":{"obsTimeUtc":"2026-04-27T17:03:03Z"}}
+{"ts":"2026-04-27T17:04:06.005Z","level":"info","message":"[poll] duplicate skipped","details":{"obsTimeUtc":"2026-04-27T17:03:03Z"}}
+{"ts":"2026-04-27T17:04:18.174Z","level":"info","message":"[http] request","details":{"method":"OPTIONS","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T17:04:18.179Z","level":"info","message":"[http] request","details":{"method":"GET","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T17:04:36.055Z","level":"info","message":"[poll] saved observation","details":{"obsTimeUtc":"2026-04-27T17:04:08Z","temp":9,"humidity":81,"wind":0}}
+{"ts":"2026-04-27T17:05:06.004Z","level":"info","message":"[poll] duplicate skipped","details":{"obsTimeUtc":"2026-04-27T17:04:08Z"}}
+{"ts":"2026-04-27T17:05:18.160Z","level":"info","message":"[http] request","details":{"method":"OPTIONS","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T17:05:18.167Z","level":"info","message":"[http] request","details":{"method":"GET","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T17:05:35.979Z","level":"info","message":"[poll] saved observation","details":{"obsTimeUtc":"2026-04-27T17:05:13Z","temp":9,"humidity":81,"wind":0}}
+{"ts":"2026-04-27T17:06:06.377Z","level":"info","message":"[poll] duplicate skipped","details":{"obsTimeUtc":"2026-04-27T17:05:13Z"}}
+{"ts":"2026-04-27T17:06:18.169Z","level":"info","message":"[http] request","details":{"method":"OPTIONS","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T17:06:18.181Z","level":"info","message":"[http] request","details":{"method":"GET","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T17:06:36.073Z","level":"info","message":"[poll] saved observation","details":{"obsTimeUtc":"2026-04-27T17:06:27Z","temp":9,"humidity":81,"wind":0}}
+{"ts":"2026-04-27T17:07:06.067Z","level":"info","message":"[poll] duplicate skipped","details":{"obsTimeUtc":"2026-04-27T17:06:27Z"}}
+{"ts":"2026-04-27T17:07:18.176Z","level":"info","message":"[http] request","details":{"method":"OPTIONS","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T17:07:18.181Z","level":"info","message":"[http] request","details":{"method":"GET","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T17:07:35.975Z","level":"info","message":"[poll] saved observation","details":{"obsTimeUtc":"2026-04-27T17:07:32Z","temp":8,"humidity":81,"wind":0}}
+{"ts":"2026-04-27T17:08:06.167Z","level":"info","message":"[poll] duplicate skipped","details":{"obsTimeUtc":"2026-04-27T17:07:32Z"}}
+{"ts":"2026-04-27T17:08:18.176Z","level":"info","message":"[http] request","details":{"method":"OPTIONS","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T17:08:18.188Z","level":"info","message":"[http] request","details":{"method":"GET","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T17:08:36.113Z","level":"info","message":"[poll] duplicate skipped","details":{"obsTimeUtc":"2026-04-27T17:07:32Z"}}
+{"ts":"2026-04-27T17:09:06.133Z","level":"info","message":"[poll] saved observation","details":{"obsTimeUtc":"2026-04-27T17:08:37Z","temp":8,"humidity":81,"wind":0}}
+{"ts":"2026-04-27T17:09:18.176Z","level":"info","message":"[http] request","details":{"method":"OPTIONS","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T17:09:18.180Z","level":"info","message":"[http] request","details":{"method":"GET","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T17:09:36.059Z","level":"info","message":"[poll] duplicate skipped","details":{"obsTimeUtc":"2026-04-27T17:08:37Z"}}
+{"ts":"2026-04-27T17:10:06.025Z","level":"info","message":"[poll] saved observation","details":{"obsTimeUtc":"2026-04-27T17:09:42Z","temp":8,"humidity":80,"wind":0}}
+{"ts":"2026-04-27T17:10:18.193Z","level":"info","message":"[http] request","details":{"method":"OPTIONS","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T17:10:18.204Z","level":"info","message":"[http] request","details":{"method":"GET","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T17:10:36.213Z","level":"info","message":"[poll] duplicate skipped","details":{"obsTimeUtc":"2026-04-27T17:09:42Z"}}
+{"ts":"2026-04-27T17:11:06.272Z","level":"info","message":"[poll] saved observation","details":{"obsTimeUtc":"2026-04-27T17:10:47Z","temp":9,"humidity":80,"wind":0}}
+{"ts":"2026-04-27T17:11:18.172Z","level":"info","message":"[http] request","details":{"method":"OPTIONS","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T17:11:18.187Z","level":"info","message":"[http] request","details":{"method":"GET","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T17:11:36.225Z","level":"info","message":"[poll] duplicate skipped","details":{"obsTimeUtc":"2026-04-27T17:10:47Z"}}
+{"ts":"2026-04-27T17:12:06.253Z","level":"info","message":"[poll] saved observation","details":{"obsTimeUtc":"2026-04-27T17:11:52Z","temp":8,"humidity":80,"wind":0}}
+{"ts":"2026-04-27T17:12:18.166Z","level":"info","message":"[http] request","details":{"method":"OPTIONS","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T17:12:18.182Z","level":"info","message":"[http] request","details":{"method":"GET","pathname":"/api/weather/current","query":{}}}
+{"ts":"2026-04-27T17:12:36.214Z","level":"info","message":"[poll] duplicate skipped","details":{"obsTimeUtc":"2026-04-27T17:11:52Z"}}
