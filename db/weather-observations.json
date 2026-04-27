@@ -13009,6 +13009,36 @@
       "pressure": 1016.26,
       "precipRate": 0,
       "precipTotal": 1.27
+    },
+    {
+      "stationID": "IKOTAY9",
+      "obsTimeUtc": "2026-04-27T16:44:26Z",
+      "obsTimeLocal": "2026-04-27 20:44:26",
+      "epoch": 1777308266,
+      "temperature_2m": 9,
+      "relative_humidity_2m": 78,
+      "absolute_humidity_2m": 6.87,
+      "wind_speed_10m": 0,
+      "shortwave_radiation": 0,
+      "winddir": 333,
+      "pressure": 1016.26,
+      "precipRate": 0,
+      "precipTotal": 1.27
+    },
+    {
+      "stationID": "IKOTAY9",
+      "obsTimeUtc": "2026-04-27T16:45:31Z",
+      "obsTimeLocal": "2026-04-27 20:45:31",
+      "epoch": 1777308331,
+      "temperature_2m": 9,
+      "relative_humidity_2m": 78,
+      "absolute_humidity_2m": 6.87,
+      "wind_speed_10m": 0,
+      "shortwave_radiation": 0,
+      "winddir": 333,
+      "pressure": 1016.26,
+      "precipRate": 0,
+      "precipTotal": 1.27
     }
   ]
 }
