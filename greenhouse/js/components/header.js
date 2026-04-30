@@ -59,7 +59,7 @@ const Header = (() => {
 
   function render() {
     document.getElementById('app-header').innerHTML = `
-      <a class="logo" href="/greenhouse/index.html" title="Go to home">
+      <a class="logo" href="/index.html" title="Go to home">
         <span class="logo-box">GC</span>
         Operator
         ${hasSession() ? `<span class="header-user-near-logo">${toTitleCase(currentUsername() || 'operator')}</span>` : ''}

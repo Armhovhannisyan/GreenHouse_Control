@@ -5,6 +5,7 @@ const path = require('path');
 const url = require('url');
 const crypto = require('crypto');
 const Ewelink = require('ewelink-api');
+const ewelinkApp = require('./ewelink-app');
 
 require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 
@@ -17,17 +18,17 @@ const WEATHER_CFG = {
   apiKey: process.env.WEATHER_API_KEY || '4a09500e731f432b89500e731f532b68',
 };
 
-const EWELINK_CFG = {
-  email: process.env.EWELINK_EMAIL || '',
-  password: process.env.EWELINK_PASSWORD || '',
-  region: process.env.EWELINK_REGION || 'eu',
-};
+function getSonoffCfg() {
+  return ewelinkApp.loadConfig(process.env, PORT);
+}
 
 const ROOT_DIR = path.resolve(__dirname, '..', 'greenhouse');
 const DB_DIR = path.resolve(__dirname, '..', 'db');
 const DB_FILE = path.resolve(DB_DIR, 'weather-observations.json');
 const USERS_FILE = path.resolve(DB_DIR, 'users.json');
 const SESSIONS_FILE = path.resolve(DB_DIR, 'sessions.json');
+const CLIMATE_STRATEGY_FILE = path.resolve(DB_DIR, 'climate-strategy.json');
+const RELAY_MODES_FILE = path.resolve(DB_DIR, 'relay-modes.json');
 const LOG_DIR = path.resolve(__dirname, '..', 'logs');
 const LOG_FILE = path.resolve(LOG_DIR, 'backend.log');
 
@@ -41,6 +42,12 @@ function ensureDbFile() {
   }
   if (!fs.existsSync(SESSIONS_FILE)) {
     fs.writeFileSync(SESSIONS_FILE, JSON.stringify({ sessions: [] }, null, 2), 'utf8');
+  }
+  if (!fs.existsSync(CLIMATE_STRATEGY_FILE)) {
+    fs.writeFileSync(CLIMATE_STRATEGY_FILE, JSON.stringify({ periods: null }, null, 2), 'utf8');
+  }
+  if (!fs.existsSync(RELAY_MODES_FILE)) {
+    fs.writeFileSync(RELAY_MODES_FILE, JSON.stringify({ modes: {} }, null, 2), 'utf8');
   }
   if (!fs.existsSync(LOG_DIR)) fs.mkdirSync(LOG_DIR, { recursive: true });
   if (!fs.existsSync(LOG_FILE)) fs.writeFileSync(LOG_FILE, '', 'utf8');
@@ -103,6 +110,47 @@ function readSessions() {
 
 function writeSessions(sessionsDb) {
   fs.writeFileSync(SESSIONS_FILE, JSON.stringify(sessionsDb, null, 2), 'utf8');
+}
+
+function readClimateStrategy() {
+  ensureDbFile();
+  try {
+    const raw = fs.readFileSync(CLIMATE_STRATEGY_FILE, 'utf8');
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' ? parsed : { periods: null };
+  } catch (_err) {
+    return { periods: null };
+  }
+}
+
+function writeClimateStrategy(doc) {
+  fs.writeFileSync(CLIMATE_STRATEGY_FILE, JSON.stringify(doc, null, 2), 'utf8');
+}
+
+function relayModeKey(deviceId, channel) {
+  return String(deviceId || '').trim() + ':' + String(Number(channel));
+}
+
+function readRelayModes() {
+  ensureDbFile();
+  try {
+    const raw = fs.readFileSync(RELAY_MODES_FILE, 'utf8');
+    const parsed = JSON.parse(raw);
+    return parsed && parsed.modes && typeof parsed.modes === 'object' ? parsed : { modes: {} };
+  } catch (_err) {
+    return { modes: {} };
+  }
+}
+
+function writeRelayModes(doc) {
+  fs.writeFileSync(RELAY_MODES_FILE, JSON.stringify(doc, null, 2), 'utf8');
+}
+
+function getRelayMode(deviceId, channel) {
+  const doc = readRelayModes();
+  const key = relayModeKey(deviceId, channel);
+  const mode = String((doc.modes || {})[key] || '').toLowerCase();
+  return mode === 'manual' ? 'manual' : 'automatic';
 }
 
 function parseBody(req) {
@@ -174,23 +222,26 @@ function unauthorized(res) {
 
 const ewelinkClientsByRegion = {};
 
-function hasEwelinkCredentials() {
-  return Boolean(EWELINK_CFG.email && EWELINK_CFG.password);
+function hasEwelinkLegacyCredentials() {
+  const cfg = getSonoffCfg();
+  return Boolean(cfg.email && cfg.password);
 }
 
 function getEwelinkClient() {
-  return getEwelinkClientForRegion(EWELINK_CFG.region);
+  const cfg = getSonoffCfg();
+  return getEwelinkClientForRegion(cfg.region);
 }
 
 function getEwelinkClientForRegion(region) {
-  if (!hasEwelinkCredentials()) {
+  if (!hasEwelinkLegacyCredentials()) {
     throw new Error('Missing EWELINK_EMAIL or EWELINK_PASSWORD');
   }
-  const key = String(region || EWELINK_CFG.region || 'eu').toLowerCase();
+  const cfg = getSonoffCfg();
+  const key = String(region || cfg.region || 'eu').toLowerCase();
   if (!ewelinkClientsByRegion[key]) {
     ewelinkClientsByRegion[key] = new Ewelink({
-      email: EWELINK_CFG.email,
-      password: EWELINK_CFG.password,
+      email: cfg.email,
+      password: cfg.password,
       region: key,
     });
   }
@@ -205,7 +256,8 @@ function getErrorInfo(nonArrayResponse) {
 }
 
 async function getDevicesWithRegionFallback() {
-  const primary = String(EWELINK_CFG.region || 'eu').toLowerCase();
+  const cfg = getSonoffCfg();
+  const primary = String(cfg.region || 'eu').toLowerCase();
   const candidates = [primary, 'eu', 'us', 'cn', 'as'].filter(function (v, i, a) {
     return a.indexOf(v) === i;
   });
@@ -225,21 +277,70 @@ async function getDevicesWithRegionFallback() {
   throw new Error((lastErr.code ? `code ${lastErr.code}: ` : '') + lastErr.details);
 }
 
+async function fetchSonoffDevicesCombined() {
+  const cfg = getSonoffCfg();
+  const oauth = ewelinkApp.readOauth();
+  if (ewelinkApp.hasAppCredentials(cfg) && oauth && oauth.data && oauth.data.accessToken) {
+    return ewelinkApp.fetchDevicesOAuth(cfg);
+  }
+  if (hasEwelinkLegacyCredentials()) {
+    return getDevicesWithRegionFallback();
+  }
+  throw new Error(
+    'eWeLink not configured. Add EWELINK_APP_ID + EWELINK_APP_SECRET, set redirect URL in developer portal to match EWELINK_OAUTH_REDIRECT_URL, then open GET /api/sonoff/oauth/start while logged in. Or set EWELINK_EMAIL + EWELINK_PASSWORD for legacy mode.'
+  );
+}
+
+async function controlSonoffCombined(deviceId, state, channel) {
+  const cfg = getSonoffCfg();
+  const oauth = ewelinkApp.readOauth();
+  if (ewelinkApp.hasAppCredentials(cfg) && oauth && oauth.data && oauth.data.accessToken) {
+    return ewelinkApp.controlThingOAuth(cfg, deviceId, state, channel);
+  }
+  if (hasEwelinkLegacyCredentials()) {
+    const client = getEwelinkClient();
+    return client.setDevicePowerState(deviceId, state, channel);
+  }
+  throw new Error('eWeLink not configured (OAuth or legacy credentials).');
+}
+
+function numOrNull(v) {
+  if (v == null || v === '') return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
+function firstNum(a, b, c) {
+  var n = numOrNull(a);
+  if (n != null) return n;
+  n = numOrNull(b);
+  if (n != null) return n;
+  return numOrNull(c);
+}
+
 function simplifySonoffDevice(d) {
-  const params = d && d.params ? d.params : {};
-  const switches = Array.isArray(params.switches)
+  if (!d) return null;
+  const params = d.params || {};
+  var switchesFromParams = Array.isArray(params.switches)
     ? params.switches.map(function (s) { return { outlet: s.outlet, switch: s.switch }; })
     : null;
+  var switchesFromTop = Array.isArray(d.switches)
+    ? d.switches.map(function (s) { return { outlet: s.outlet, switch: s.switch }; })
+    : null;
+  var switches = switchesFromTop && switchesFromTop.length ? switchesFromTop : switchesFromParams;
+  var temperature = firstNum(d.temperature, params.currentTemperature, params.temperature);
+  var humidity = firstNum(d.humidity, params.currentHumidity, params.humidity);
+  var switchVal = d.switch != null && d.switch !== '' ? d.switch : params.switch || null;
   return {
     deviceid: d.deviceid,
     name: d.name || d.deviceid,
     online: Boolean(d.online),
-    brand: d.brandName || null,
+    brand: d.brandName || d.brand || null,
     productModel: d.productModel || null,
     uiid: d.uiid || null,
-    temperature: params.currentTemperature != null ? Number(params.currentTemperature) : null,
-    humidity: params.currentHumidity != null ? Number(params.currentHumidity) : null,
-    switch: params.switch || null,
+    temperature: temperature,
+    humidity: humidity,
+    switch: switchVal,
     switches: switches,
   };
 }
@@ -438,7 +539,7 @@ function json(res, code, payload) {
     'Content-Type': 'application/json; charset=utf-8',
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
     'Cache-Control': 'no-store',
   });
   res.end(body);
@@ -545,7 +646,7 @@ const server = http.createServer(function (req, res) {
     res.writeHead(204, {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
     });
     res.end();
     return;
@@ -624,6 +725,39 @@ const server = http.createServer(function (req, res) {
     return;
   }
 
+  if (pathname === '/api/climate-strategy/periods' && req.method === 'GET') {
+    const authUser = authUserFromReq(req);
+    if (!authUser) {
+      unauthorized(res);
+      return;
+    }
+    const doc = readClimateStrategy();
+    json(res, 200, { periods: doc.periods == null ? null : doc.periods });
+    return;
+  }
+
+  if (pathname === '/api/climate-strategy/periods' && req.method === 'PUT') {
+    const authUser = authUserFromReq(req);
+    if (!authUser) {
+      unauthorized(res);
+      return;
+    }
+    parseBody(req)
+      .then(function (body) {
+        const arr = body.periods;
+        if (!Array.isArray(arr) || arr.length < 1 || arr.length > 24) {
+          json(res, 400, { error: 'periods must be an array of length 1–24' });
+          return;
+        }
+        writeClimateStrategy({ periods: arr });
+        json(res, 200, { ok: true });
+      })
+      .catch(function (err) {
+        json(res, 400, { error: err.message || 'Bad request' });
+      });
+    return;
+  }
+
   if (pathname.indexOf('/api/weather/') === 0) {
     const authUser = authUserFromReq(req);
     if (!authUser) {
@@ -649,6 +783,31 @@ const server = http.createServer(function (req, res) {
     return;
   }
 
+  if (pathname === '/api/sonoff/oauth/callback' && req.method === 'GET') {
+    (function () {
+      const cfg = getSonoffCfg();
+      ewelinkApp
+        .oauthCallback(cfg, parsed.query || {}, logEvent)
+        .then(function (result) {
+          const safe = String(result.message || '').replace(/</g, '&lt;');
+          res.writeHead(result.ok ? 200 : 400, { 'Content-Type': 'text/html; charset=utf-8' });
+          res.end(
+            '<!DOCTYPE html><html><head><meta charset="utf-8"><title>eWeLink</title></head><body style="font-family:system-ui,sans-serif;padding:24px">' +
+              (result.ok ? '<h2>eWeLink linked</h2>' : '<h2>eWeLink link failed</h2>') +
+              '<p>' +
+              safe +
+              '</p></body></html>'
+          );
+        })
+        .catch(function (err) {
+          logEvent('error', '[sonoff] oauth callback', err && err.message ? err.message : err);
+          res.writeHead(500, { 'Content-Type': 'text/html; charset=utf-8' });
+          res.end('<!DOCTYPE html><html><body><p>OAuth callback error</p></body></html>');
+        });
+    })();
+    return;
+  }
+
   if (pathname.indexOf('/api/sonoff/') === 0) {
     const authUser = authUserFromReq(req);
     if (!authUser) {
@@ -657,53 +816,122 @@ const server = http.createServer(function (req, res) {
     }
   }
 
+  if ((pathname === '/api/sonoff/oauth/start' && req.method === 'POST') || (pathname === '/api/sonoff/oauth/start' && req.method === 'GET')) {
+    const authUser = authUserFromReq(req);
+    if (!authUser) {
+      unauthorized(res);
+      return;
+    }
+    try {
+      const cfg = getSonoffCfg();
+      const loginUrl = ewelinkApp.oauthStart(cfg, authUser.id, logEvent);
+      if (req.method === 'GET') {
+        res.writeHead(302, { Location: loginUrl });
+        res.end();
+        return;
+      }
+      json(res, 200, { url: loginUrl });
+    } catch (err) {
+      json(res, 400, { error: err.message || 'OAuth start failed' });
+    }
+    return;
+  }
+
   if (pathname === '/api/sonoff/devices' && req.method === 'GET') {
     try {
-      getDevicesWithRegionFallback().then(function (found) {
-        const rows = found.devices.map(simplifySonoffDevice);
-        json(res, 200, { region: found.region, count: rows.length, devices: rows });
-      }).catch(function (err) {
-        logEvent('error', '[sonoff] get devices failed', err && err.message ? err.message : err);
-        json(res, 502, { error: 'Failed to fetch devices from eWeLink cloud', details: err && err.message ? err.message : String(err) });
-      });
+      fetchSonoffDevicesCombined()
+        .then(function (found) {
+          const rows = found.devices.map(simplifySonoffDevice);
+          const relayModes = readRelayModes().modes || {};
+          json(res, 200, { region: found.region, count: rows.length, relayModes: relayModes, devices: rows });
+        })
+        .catch(function (err) {
+          logEvent('error', '[sonoff] get devices failed', err && err.message ? err.message : err);
+          json(res, 502, { error: 'Failed to fetch devices from eWeLink cloud', details: err && err.message ? err.message : String(err) });
+        });
     } catch (err) {
       json(res, 400, {
         error: err.message,
-        hint: 'Set EWELINK_EMAIL, EWELINK_PASSWORD and EWELINK_REGION (eu/us/cn) in backend environment.',
+        hint: 'Set EWELINK_APP_ID + EWELINK_APP_SECRET and complete OAuth, or set EWELINK_EMAIL + EWELINK_PASSWORD (legacy).',
       });
     }
     return;
   }
 
-  if (pathname === '/api/sonoff/control' && req.method === 'POST') {
-    parseBody(req).then(function (body) {
-      const deviceId = String(body.deviceId || '').trim();
-      const state = String(body.state || '').toLowerCase();
-      const channel = body.channel == null ? 1 : Number(body.channel);
-      if (!deviceId || !['on', 'off', 'toggle'].includes(state) || !Number.isFinite(channel)) {
-        json(res, 400, { error: 'deviceId, state(on/off/toggle), channel(number) are required' });
-        return;
-      }
-      let client;
-      try {
-        client = getEwelinkClient();
-      } catch (err) {
-        json(res, 400, {
-          error: err.message,
-          hint: 'Set EWELINK_EMAIL, EWELINK_PASSWORD and EWELINK_REGION (eu/us/cn) in backend environment.',
-        });
-        return;
-      }
-      client.setDevicePowerState(deviceId, state, channel).then(function (result) {
-        logEvent('info', '[sonoff] control success', { deviceId, state, channel, result: result || {} });
-        json(res, 200, { ok: true, result: result || {} });
-      }).catch(function (err) {
-        logEvent('error', '[sonoff] control failed', err && err.message ? err.message : err);
-        json(res, 502, { error: 'Failed to control Sonoff device' });
+  if (pathname === '/api/sonoff/debug/raw' && req.method === 'GET') {
+    const deviceId = String(parsed.query.deviceId || '').trim();
+    if (!deviceId) {
+      json(res, 400, { error: 'deviceId query is required' });
+      return;
+    }
+    const cfg = getSonoffCfg();
+    ewelinkApp
+      .debugRawThingAndStatus(cfg, deviceId)
+      .then(function (payload) {
+        json(res, 200, payload);
+      })
+      .catch(function (err) {
+        json(res, 502, { error: err.message || 'Debug request failed' });
       });
-    }).catch(function (err) {
-      json(res, 400, { error: err.message || 'Bad request' });
-    });
+    return;
+  }
+
+  if (pathname === '/api/sonoff/relay-mode' && req.method === 'PUT') {
+    parseBody(req)
+      .then(function (body) {
+        const deviceId = String(body.deviceId || '').trim();
+        const channel = body.channel == null ? 1 : Number(body.channel);
+        const mode = String(body.mode || '').toLowerCase();
+        if (!deviceId || !Number.isFinite(channel) || !['automatic', 'manual'].includes(mode)) {
+          json(res, 400, { error: 'deviceId, channel(number), mode(automatic/manual) are required' });
+          return;
+        }
+        const doc = readRelayModes();
+        doc.modes = doc.modes || {};
+        doc.modes[relayModeKey(deviceId, channel)] = mode;
+        writeRelayModes(doc);
+        json(res, 200, { ok: true, deviceId: deviceId, channel: channel, mode: mode });
+      })
+      .catch(function (err) {
+        json(res, 400, { error: err && err.message ? err.message : 'Invalid body' });
+      });
+    return;
+  }
+
+  if (pathname === '/api/sonoff/control' && req.method === 'POST') {
+    parseBody(req)
+      .then(function (body) {
+        const deviceId = String(body.deviceId || '').trim();
+        const state = String(body.state || '').toLowerCase();
+        const channel = body.channel == null ? 1 : Number(body.channel);
+        const source = String(body.source || 'unknown').toLowerCase();
+        if (!deviceId || !['on', 'off', 'toggle'].includes(state) || !Number.isFinite(channel)) {
+          json(res, 400, { error: 'deviceId, state(on/off/toggle), channel(number) are required' });
+          return;
+        }
+        const mode = getRelayMode(deviceId, channel);
+        if (mode === 'manual' && source !== 'manual-override') {
+          json(res, 423, {
+            error: 'Relay is in Manual mode and locked to Manual Override page',
+            mode: mode,
+            deviceId: deviceId,
+            channel: channel,
+          });
+          return;
+        }
+        return controlSonoffCombined(deviceId, state, channel).then(function (result) {
+          logEvent('info', '[sonoff] control success', { deviceId, state, channel, source, mode, result: result || {} });
+          json(res, 200, { ok: true, mode: mode, result: result || {} });
+        });
+      })
+      .catch(function (err) {
+        if (err && err.message && err.message.indexOf('not configured') !== -1) {
+          json(res, 400, { error: err.message });
+          return;
+        }
+        logEvent('error', '[sonoff] control failed', err && err.message ? err.message : err);
+        json(res, 502, { error: 'Failed to control Sonoff device', details: err && err.message ? err.message : String(err) });
+      });
     return;
   }
 

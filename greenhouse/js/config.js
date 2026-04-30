@@ -36,6 +36,13 @@ const CONFIG = {
   weatherComUnits: 's', // s = metric SI (C, m/s), e = imperial
   weatherComApiKey: '4a09500e731f432b89500e731f532b68',
   backendBaseUrl: 'http://localhost:3001',
+
+  /* ── SONOFF / eWeLink indoor probe (optional) ───────────────── */
+  // When set, this deviceid is used for indoor temp & RH on the climate UI.
+  // Leave empty to auto-pick the first device that reports temperature (and humidity if present).
+  sonoffClimateDeviceId: '',
+  // Set false to skip calling /api/sonoff/devices (PLC / sim only).
+  useSonoffIndoorClimate: true,
   // Browser CORS may block direct calls to weather.com from static pages.
   // If that happens, app falls back to Open-Meteo to keep UI populated.
   openMeteoBase: 'https://api.open-meteo.com/v1/forecast',
@@ -47,9 +54,22 @@ const CONFIG = {
   // [min, max] for each gauge arc
   gaugeRanges: {
     weather:    [-8,  40],
-    climate:    [15.5, 28],
+    /* Indoor / climate arc: wide enough that typical Sonoff & winter readings still show green */
+    climate:    [0, 40],
     waterFlow:  [0,   10],
     energyTemp: [20, 105],
+    /* Climate page only — same scales as used on dashboard where applicable */
+    humidity:   [0, 100],
+    percent:    [0, 100],
+    windSpeed:  [0, 20],
+  },
+
+  /* Climate strategy → Settings table layout (rem). periodSlotRem = width of each Period N data column (schedule + detail). */
+  climateStrategyDetailColumns: {
+    paramColRem: 11,
+    subColRem: 5.4,
+    periodSlotRem: 6.75,
+    cornerRem: 2.25,
   },
 
   /* ── POLLING ─────────────────────────────────────────────────── */

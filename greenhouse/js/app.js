@@ -65,7 +65,6 @@ const App = (() => {
     try {
       const { current, hourly } = await WeatherAPI.fetch();
       const sensors             = await SensorAPI.fetchAll(current);
-
       Cards.update(current, sensors);
       if (typeof Charts !== 'undefined' && Charts && typeof Charts.update === 'function') {
         Charts.update(hourly);

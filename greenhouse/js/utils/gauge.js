@@ -57,9 +57,20 @@ const Gauge = (() => {
     const lblValue = document.getElementById(`${id}-val-value`);
     if (!arc || !lblValue) return;
 
-    const pct = Math.max(0, Math.min(1, (value - min) / (max - min)));
-    arc.style.strokeDashoffset = ARC_VISIBLE - pct * ARC_VISIBLE;
-    lblValue.textContent = display ?? value;
+    const v = Number(value);
+    const lo = Number(min);
+    const hi = Number(max);
+    const span = hi - lo;
+    let pct = 0;
+    if (Number.isFinite(v) && Number.isFinite(lo) && Number.isFinite(hi) && span > 0) {
+      pct = Math.max(0, Math.min(1, (v - lo) / span));
+    }
+    arc.style.strokeDashoffset = String(ARC_VISIBLE - pct * ARC_VISIBLE);
+    if (display != null && display !== '') {
+      lblValue.textContent = display;
+    } else {
+      lblValue.textContent = Number.isFinite(v) ? String(v) : '—';
+    }
   }
 
   return { html, update };

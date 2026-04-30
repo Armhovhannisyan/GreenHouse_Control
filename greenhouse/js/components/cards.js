@@ -1,7 +1,7 @@
 /**
  * js/components/cards.js
  * ─────────────────────────────────────────────────────────────────
- * Builds the 5 zone cards on first load, then provides
+ * Builds the zone cards on first load, then provides
  * an update() method to refresh values without re-rendering DOM.
  */
 
@@ -95,6 +95,22 @@ const Cards = (() => {
           </div>
         </div>
       </div>
+
+      <!-- MANUAL OVERRIDE -->
+      <div class="card card-clickable" id="manualOverrideCard" title="Open Sonoff manual control" role="button" tabindex="0">
+        <div class="card-title"><span class="card-icon">🕹️</span> Manual Override</div>
+        ${Gauge.html({ id: 'moGauge', min: cMin, max: cMax, unit: '°C', color: 'green' })}
+        <div class="card-stats">
+          <div class="stat">
+            <div class="stat-label">Sonoff / eWeLink</div>
+            <div class="stat-value font-mono" id="moStatSource">Relays</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Control</div>
+            <div class="stat-value font-mono" id="moStatHint">Open page</div>
+          </div>
+        </div>
+      </div>
     `;
 
     const weatherCard = document.getElementById('weatherZoneCard');
@@ -119,6 +135,19 @@ const Cards = (() => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           window.location.href = 'climate.html';
+        }
+      });
+    }
+
+    const moCard = document.getElementById('manualOverrideCard');
+    if (moCard) {
+      moCard.addEventListener('click', () => {
+        window.location.href = 'manual-override.html';
+      });
+      moCard.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          window.location.href = 'manual-override.html';
         }
       });
     }
@@ -163,6 +192,12 @@ const Cards = (() => {
     Gauge.update('erGauge', energyRoom.temp, eMin, eMax, energyRoom.temp);
     Helpers.setStat('erMode', energyRoom.mode, 'ok');
     Helpers.setStat('erProg', energyRoom.program, energyRoom.program === 'Off' ? 'off' : 'ok');
+
+    // Manual override card (opens manual-override.html for Sonoff relays)
+    Gauge.update('moGauge', climate.temp, cMin, cMax, climate.temp);
+    Helpers.setStat('moStatSource', 'Relays', 'ok');
+    Helpers.setStat('moStatHint', 'Open page', 'off');
+
   }
 
   return { render, update };

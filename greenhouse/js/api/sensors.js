@@ -16,7 +16,7 @@
  *   SensorAPI.fetchAll(weatherCurrent) → Promise<SensorData>
  *
  * SensorData = {
- *   climate:    { temp, humidity, heating, cooling }
+ *   climate:    { temp, humidity, heating, cooling, indoorProbeName? }
  *   irrigation: { active, waiting }
  *   waterRoom:  { flow, status, recipe }
  *   energyRoom: { temp, mode, program }
@@ -114,6 +114,29 @@ const SensorAPI = (() => {
     };
   }
 
+  async function overlaySonoffClimate(sensors) {
+    if (typeof SonoffAPI === 'undefined') return sensors;
+    var probe = null;
+    try {
+      probe = await SonoffAPI.fetchIndoorClimate();
+    } catch (_e) {
+      return sensors;
+    }
+    if (!probe) return sensors;
+    var climate = Object.assign({}, sensors.climate);
+    var applied = false;
+    if (probe.temp != null && Number.isFinite(probe.temp)) {
+      climate.temp = Helpers.round(probe.temp, 1);
+      applied = true;
+    }
+    if (probe.humidity != null && Number.isFinite(probe.humidity)) {
+      climate.humidity = Math.round(probe.humidity);
+      applied = true;
+    }
+    if (applied && probe.deviceName) climate.indoorProbeName = probe.deviceName;
+    return Object.assign({}, sensors, { climate: climate });
+  }
+
   /* ────────────────────────────────────────────────────────────
      PUBLIC API
   ──────────────────────────────────────────────────────────── */
@@ -127,22 +150,24 @@ const SensorAPI = (() => {
    * @returns {Promise<SensorData>}
    */
   async function fetchAll(weatherCurrent) {
+    var base;
     if (!CONFIG.sensorBaseUrl) {
-      return simulate(weatherCurrent);
+      base = simulate(weatherCurrent);
+    } else {
+      try {
+        const [climate, irrigation, waterRoom, energyRoom] = await Promise.all([
+          fetchClimate(),
+          fetchIrrigation(),
+          fetchWaterRoom(),
+          fetchEnergyRoom(),
+        ]);
+        base = { climate, irrigation, waterRoom, energyRoom };
+      } catch (err) {
+        console.warn('[SensorAPI] Real fetch failed, using simulation:', err.message);
+        base = simulate(weatherCurrent);
+      }
     }
-
-    try {
-      const [climate, irrigation, waterRoom, energyRoom] = await Promise.all([
-        fetchClimate(),
-        fetchIrrigation(),
-        fetchWaterRoom(),
-        fetchEnergyRoom(),
-      ]);
-      return { climate, irrigation, waterRoom, energyRoom };
-    } catch (err) {
-      console.warn('[SensorAPI] Real fetch failed, using simulation:', err.message);
-      return simulate(weatherCurrent);
-    }
+    return overlaySonoffClimate(base);
   }
 
   return { fetchAll };

@@ -20,6 +20,13 @@
       "passwordHash": "f3d082fb729433f237f47a9b9672037a726dc73ee7207ba42ce760c0c0a6e3e16762fedf2a26f50c52165e0f483b70658bfebe8ebe31f85ddc52224bbc40e20b",
       "salt": "300b3cb7b6b723b84b38ac21caef99cf",
       "createdAt": "2026-04-26T14:45:16.712Z"
+    },
+    {
+      "id": "227cbaf881073a2a",
+      "username": "test",
+      "passwordHash": "d1aeaa89557e14539523e8e5bbece9f5afa1952afcfc9f49b1d114d03ddb4994caf921e35013745dc8cdaf22873b0f8bafa36524e90a325bff3850ffc969b352",
+      "salt": "92c5ed0dd6565cdfc11547489c61f184",
+      "createdAt": "2026-04-27T18:21:20.670Z"
     }
   ]
 }

@@ -23,17 +23,19 @@
 
 .climate-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-  gap: 12px;
-  padding: 16px;
+  /* Match cards grid min width so full-size gauges (186×126) fit like the home page */
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 16px;
+  padding: 16px 20px;
 }
 
 .climate-box {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 4px;
-  min-height: 176px;
-  padding: 10px;
+  border-radius: var(--radius-card);
+  min-height: 280px;
+  padding: 18px 16px 14px;
+  box-shadow: var(--card-shadow);
   transition: box-shadow .2s, transform .2s;
 }
 
@@ -47,10 +49,10 @@
 }
 
 .climate-title {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--text-primary);
-  margin-bottom: 10px;
+  margin-bottom: 16px;
 }
 
 .climate-value-panel {
@@ -60,30 +62,32 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 30px;
+  font-size: 24px;
   color: #334f5d;
   margin-bottom: 10px;
 }
 
+.climate-box--centered-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.climate-box--centered-panel .climate-title {
+  margin-bottom: 0;
+}
+
+.climate-box--centered-panel .climate-value-panel {
+  width: 88%;
+  margin: auto auto;
+}
+
+/* Gauges use global .gauge-wrap / .gauge-svg from components.css (same as dashboard). */
 .climate-gauge-wrap {
-  margin-bottom: 8px;
+  margin-bottom: 0;
 }
 
 .climate-gauge-wrap .gauge-wrap {
-  margin-bottom: 6px;
-}
-
-.climate-gauge-wrap .gauge-svg {
-  width: 134px;
-  height: 76px;
-}
-
-.climate-gauge-wrap .gauge-value {
-  font-size: 20px;
-}
-
-.climate-gauge-wrap .gauge-unit {
-  font-size: 10px;
+  margin-bottom: 14px;
 }
 
 .climate-unit {
@@ -122,4 +126,564 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 12px;
+}
+
+/* ── Climate strategy page (accordion) ─────────────────────── */
+.page-climate-strategy .main--climate-strategy {
+  background: var(--bg);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.climate-strategy-pagehead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 24px 20px;
+  background: var(--header-bg);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
+}
+
+.climate-strategy-pagehead-title {
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  margin: 0;
+}
+
+.climate-strategy-pagehead-crumb {
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.78);
+  font-weight: 400;
+}
+
+.climate-strategy-pagehead-kebab {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  margin-top: 2px;
+}
+
+.climate-strategy-pagehead-kebab:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.page-climate-strategy .climate-section-title {
+  font-size: 15px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* Strategy sections reuse .weather-report-* from weather-reports.css */
+.page-climate-strategy .climate-strategy-report-wrap {
+  flex: 1;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.page-climate-strategy .climate-section-wrap--strategy {
+  flex: 1;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.page-climate-strategy .climate-strategy-report-title--split {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.page-climate-strategy .climate-strategy-title-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.page-climate-strategy .climate-strategy-placeholder {
+  margin: 0;
+  padding: 2px 0 4px;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+/* Climate strategy → Settings (period tables) */
+.page-climate-strategy .climate-settings-periods {
+  padding-top: 4px;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  --climate-corner-w: 2.25rem;
+  --climate-param-col-width: 11rem;
+  --climate-sub-col-width: 5.4rem;
+  --climate-period-slot-width: 6.75rem;
+}
+
+.page-climate-strategy .climate-settings-subtitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.page-climate-strategy .climate-settings-subtitle--spaced {
+  margin-top: 18px;
+}
+
+.page-climate-strategy .climate-settings-table-wrap {
+  overflow-x: auto;
+  margin-bottom: 4px;
+  border-radius: 6px;
+  border: 1px solid #e3e8e4;
+  background: #fff;
+}
+
+.page-climate-strategy .climate-settings-ramp-cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.page-climate-strategy .climate-settings-ramp-unit {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  font-family: var(--font);
+  line-height: 1.2;
+}
+
+.page-climate-strategy .climate-settings-input--time {
+  width: 4.75rem;
+  text-align: center;
+}
+
+.page-climate-strategy .climate-settings-start-inline {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+  min-width: 0;
+}
+
+.page-climate-strategy .climate-settings-start-anchor {
+  min-width: 3.5rem;
+  padding: 4px 6px;
+  font-size: 14px;
+  line-height: 1.2;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* Same footprint as the time field: sunrise/sunset sits in this slot instead of HH:MM. */
+.page-climate-strategy .climate-settings-start-time-slot {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 5.25rem;
+  max-width: 5.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  box-sizing: border-box;
+}
+
+.page-climate-strategy .climate-settings-start-time-slot .climate-settings-input--time {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.page-climate-strategy .climate-settings-start-time-slot .climate-settings-input--time:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  background: #f4f6f5;
+  color: var(--text-secondary);
+}
+
+.page-climate-strategy .climate-settings-table {
+  min-width: 520px;
+  margin: 0;
+}
+
+.page-climate-strategy .climate-settings-table.climate-settings-schedule-table {
+  table-layout: fixed;
+  width: 100%;
+  min-width: 0;
+}
+
+.page-climate-strategy .climate-settings-table th,
+.page-climate-strategy .climate-settings-table td {
+  vertical-align: middle;
+}
+
+.page-climate-strategy .climate-settings-table tbody th[scope='row'] {
+  text-align: left;
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.page-climate-strategy .weather-report-table.climate-settings-schedule-table thead tr > th:nth-child(1),
+.page-climate-strategy .weather-report-table.climate-settings-schedule-table tbody th[scope='row'] {
+  width: var(--climate-param-col-width);
+  max-width: var(--climate-param-col-width);
+  box-sizing: border-box;
+}
+
+/* Same width as Period parameters “Parameter” column (config --climate-param-col-width). */
+.page-climate-strategy .climate-settings-col-corner {
+  width: var(--climate-param-col-width);
+  min-width: var(--climate-param-col-width);
+}
+
+.page-climate-strategy .climate-settings-corner {
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  box-sizing: border-box;
+  background: #f2f6f2;
+}
+
+.page-climate-strategy .climate-settings-col-sched-period {
+  width: var(--climate-period-slot-width);
+}
+
+.page-climate-strategy .climate-settings-period-icon {
+  display: inline-block;
+  font-size: 12px;
+  color: var(--text-secondary);
+  opacity: 0.85;
+}
+
+.page-climate-strategy .climate-settings-period-head {
+  text-align: center;
+  font-weight: 600;
+  background: #f2f6f2;
+  color: #2f3d44;
+  white-space: nowrap;
+}
+
+.page-climate-strategy .climate-settings-schedule-table tbody td:not(:first-child) {
+  text-align: center;
+  vertical-align: middle;
+  padding: 6px 4px;
+}
+
+/* Center each row’s controls while keeping the same vertical band (min-height, control heights). */
+.page-climate-strategy .climate-settings-sched-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 32px;
+  box-sizing: border-box;
+}
+
+.page-climate-strategy .climate-settings-schedule-table .climate-settings-select--sched,
+.page-climate-strategy .climate-settings-schedule-table .climate-settings-start-anchor,
+.page-climate-strategy .climate-settings-schedule-table .climate-settings-input {
+  min-height: 28px;
+  box-sizing: border-box;
+  line-height: 1.25;
+}
+
+.page-climate-strategy .climate-settings-schedule-table .climate-settings-start-inline {
+  width: 80%;
+  max-width: 80%;
+  justify-content: center;
+}
+
+.page-climate-strategy .climate-settings-schedule-table .climate-settings-start-time-slot {
+  flex: 0 1 auto;
+  min-width: 0;
+  width: 4.5rem;
+  max-width: 4.5rem;
+  min-height: 28px;
+}
+
+.page-climate-strategy .climate-settings-schedule-table .climate-settings-corner {
+  vertical-align: middle;
+  text-align: center;
+}
+
+.page-climate-strategy .climate-settings-period-head--accent {
+  background: #e4f4f1;
+  color: var(--teal);
+}
+
+.page-climate-strategy .climate-settings-detail-wrap {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.page-climate-strategy .climate-settings-detail-wrap .climate-settings-table-wrap {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  box-sizing: border-box;
+}
+
+.page-climate-strategy .climate-settings-table.climate-settings-detail-table {
+  table-layout: fixed;
+  width: 100%;
+  min-width: 0;
+}
+
+.page-climate-strategy .climate-settings-detail-table col.climate-settings-col-param {
+  width: var(--climate-param-col-width);
+}
+
+.page-climate-strategy .climate-settings-detail-table col.climate-settings-col-sub {
+  width: var(--climate-sub-col-width);
+}
+
+.page-climate-strategy .climate-settings-detail-table col.climate-settings-col-value {
+  width: var(--climate-period-slot-width);
+}
+
+/* Same first-column width as schedule “use period?” column; override weather-report-table % widths. */
+.page-climate-strategy .weather-report-table.climate-settings-detail-table th:nth-child(1),
+.page-climate-strategy .weather-report-table.climate-settings-detail-table td:nth-child(1) {
+  width: var(--climate-param-col-width);
+  max-width: var(--climate-param-col-width);
+  box-sizing: border-box;
+}
+
+.page-climate-strategy .weather-report-table.climate-settings-detail-table th:nth-child(2),
+.page-climate-strategy .weather-report-table.climate-settings-detail-table td:nth-child(2) {
+  width: var(--climate-sub-col-width);
+}
+
+.page-climate-strategy .weather-report-table.climate-settings-detail-table th:nth-child(n + 3),
+.page-climate-strategy .weather-report-table.climate-settings-detail-table td:nth-child(n + 3) {
+  width: var(--climate-period-slot-width);
+}
+
+.page-climate-strategy .climate-settings-detail-label,
+.page-climate-strategy .climate-settings-detail-sub {
+  text-align: left;
+  vertical-align: middle;
+}
+
+.page-climate-strategy .climate-settings-detail-label {
+  /* Match .weather-report-table first-column padding (see weather-reports.css) */
+  padding: 6px 10px;
+}
+
+.page-climate-strategy .climate-settings-detail-sub {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  padding: 6px 10px;
+}
+
+.page-climate-strategy .climate-settings-detail-table .climate-settings-param-label {
+  text-align: left !important;
+  vertical-align: middle;
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--text-primary);
+  line-height: 1.35;
+  padding: 6px 10px;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+  box-sizing: border-box;
+}
+
+.page-climate-strategy .climate-settings-param-sub {
+  text-align: left !important;
+  vertical-align: middle;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  line-height: 1.35;
+  padding: 6px 10px;
+  white-space: normal;
+  word-wrap: break-word;
+}
+
+.page-climate-strategy .climate-settings-value-cell {
+  text-align: left !important;
+  vertical-align: middle;
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+.page-climate-strategy .climate-settings-value-inner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  flex-wrap: nowrap;
+  vertical-align: middle;
+}
+
+.page-climate-strategy .climate-settings-unit {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  font-family: var(--font);
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.page-climate-strategy .climate-settings-select,
+.page-climate-strategy .climate-settings-input {
+  font-family: var(--mono);
+  font-size: 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 6px;
+  background: #fff;
+  color: var(--text-primary);
+  max-width: 100%;
+}
+
+.page-climate-strategy .climate-settings-input--narrow {
+  width: 4.2rem;
+  flex-shrink: 0;
+}
+
+.page-climate-strategy .climate-settings-detail-table .climate-settings-period-head {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.page-climate-strategy .climate-strategy-chart-card {
+  margin-bottom: 0;
+}
+
+.page-climate-strategy .climate-strategy-chart-controls {
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  width: 100%;
+  justify-content: flex-start;
+}
+
+.page-climate-strategy .climate-strategy-param-select-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.page-climate-strategy .climate-strategy-param-select {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 6px;
+  background: #fff;
+  color: var(--text-primary);
+  font-size: 12px;
+  font-family: var(--font);
+}
+
+.page-climate-strategy .climate-strategy-chart-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.page-climate-strategy .climate-chart-filter-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-primary);
+  cursor: pointer;
+  user-select: none;
+}
+
+.page-climate-strategy .climate-chart-filter-row:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.page-climate-strategy .climate-chart-filter-toggle {
+  width: 11px;
+  height: 11px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.page-climate-strategy .climate-chart-filter-toggle--temp {
+  background: #2e9e5b;
+}
+
+.page-climate-strategy .climate-chart-filter-toggle--hum {
+  background: #4da6d6;
+}
+
+.page-climate-strategy .climate-chart-filter-toggle--cooling {
+  background: #d96f17;
+}
+
+.page-climate-strategy .climate-chart-filter-toggle--heating {
+  background: #2f6fb0;
+}
+
+.page-climate-strategy .climate-chart-filter-toggle--measured-heating {
+  background: #2e9e5b;
+}
+
+.page-climate-strategy .climate-chart-filter-toggle--periods {
+  background: #6b8090;
+}
+
+.page-climate-strategy .climate-chart-filter-toggle--strategy {
+  background: #8a5dd8;
+}
+
+.page-climate-strategy .climate-chart-filter-toggle--extra {
+  background: #8a5dd8;
+}
+
+.page-climate-strategy .climate-chart-filter-row.disabled .climate-chart-filter-toggle {
+  background: transparent !important;
+}
+
+.page-climate-strategy .climate-chart-filter-row.disabled .climate-chart-filter-label {
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+.page-climate-strategy .climate-strategy-chart-caption {
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.35;
+}
+
+.page-climate-strategy .climate-strategy-chart-status {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.page-climate-strategy #climateStrategyStatusText {
+  font-weight: 400;
 }

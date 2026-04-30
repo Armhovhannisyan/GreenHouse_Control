@@ -9,24 +9,32 @@
   <link rel="stylesheet" href="css/base.css" />
   <link rel="stylesheet" href="css/layout.css" />
   <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/weather-reports.css" />
+  <link rel="stylesheet" href="css/charts.css" />
   <link rel="stylesheet" href="css/climate.css" />
 </head>
-<body data-section-slug="climate-strategy">
+<body data-section-slug="climate-strategy" class="page-climate-strategy">
   <header id="app-header"></header>
   <div class="layout">
     <aside class="climate-sidebar">
       <a class="active" href="climate.html">Climate</a>
       <a href="index.html">Irrigation</a>
     </aside>
-    <main id="app-main">
-      <div class="page-header">climate section</div>
+    <main id="app-main" class="main--climate-strategy">
+      <div class="climate-strategy-pagehead">
+        <div class="climate-strategy-pagehead-text">
+          <h1 class="climate-strategy-pagehead-title">Climate</h1>
+          <p class="climate-strategy-pagehead-crumb">↪ climate strategy</p>
+        </div>
+        <button type="button" class="climate-strategy-pagehead-kebab" id="climateStrategyKebab" aria-label="More options" title="Menu (coming soon)">⋮</button>
+      </div>
       <div class="status-bar" id="climateSectionStatusBar"></div>
-      <div class="climate-section-wrap">
+      <div class="climate-section-wrap climate-section-wrap--strategy">
         <div class="climate-section-head">
           <a class="btn btn-secondary" href="climate.html">← Back to climate</a>
-          <div class="climate-section-title" id="climateSectionTitle">Section</div>
+          <div class="climate-section-title" id="climateSectionTitle">Climate strategy</div>
         </div>
-        <div class="climate-section-grid" id="climateSectionGrid"></div>
+        <div id="climateSectionGrid" class="weather-page-wrap climate-strategy-report-wrap" aria-label="Climate strategy sections"></div>
       </div>
     </main>
   </div>
@@ -35,7 +43,12 @@
   <script src="js/utils/logger.js"></script>
   <script src="js/components/header.js"></script>
   <script src="js/api/weather.js"></script>
+  <script src="js/api/sonoff.js"></script>
   <script src="js/api/sensors.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
   <script src="js/pages/climate-section.js"></script>
+  <script src="js/pages/climate-strategy-periods.js"></script>
+  <script src="js/pages/climate-strategy-chart.js"></script>
 </body>
 </html>

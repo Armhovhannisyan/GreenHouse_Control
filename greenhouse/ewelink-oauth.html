@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Link eWeLink account</title>
+  <link rel="stylesheet" href="css/base.css" />
+  <style>
+    body { max-width: 520px; margin: 48px auto; padding: 0 16px; }
+    p { color: var(--text-secondary); margin: 12px 0; }
+    .err { color: var(--alert-danger); }
+    .ok { color: var(--green); }
+    button { margin-top: 16px; padding: 10px 18px; border-radius: 8px; border: none; background: var(--teal); color: #fff; font-weight: 600; cursor: pointer; }
+    code { font-size: 12px; word-break: break-all; }
+  </style>
+</head>
+<body>
+  <h1>Link eWeLink (Sonoff)</h1>
+  <p>This page talks to your <strong>Node backend</strong> (see <code>CONFIG.backendBaseUrl</code> in <code>js/config.js</code>), not the static file port shown by <code>npx serve</code>.</p>
+  <p id="status">Checking login…</p>
+  <button type="button" id="btn" hidden>Start eWeLink login</button>
+
+  <script src="js/config.js"></script>
+  <script>
+    (function () {
+      const TOKEN_KEY = 'authToken.v1';
+      const status = document.getElementById('status');
+      const btn = document.getElementById('btn');
+      const base = (CONFIG.backendBaseUrl || '').replace(/\/$/, '');
+
+      function setStatus(html, cls) {
+        status.className = cls || '';
+        status.innerHTML = html;
+      }
+
+      async function startOAuth() {
+        const token = localStorage.getItem(TOKEN_KEY);
+        if (!token) {
+          setStatus('You are not logged in. <a href="login.html">Open login</a> first, then return here.', 'err');
+          return;
+        }
+        setStatus('Requesting eWeLink authorization URL…');
+        try {
+          const res = await fetch(base + '/api/sonoff/oauth/start', {
+            method: 'POST',
+            headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+          });
+          const data = await res.json().catch(function () { return {}; });
+          if (!res.ok) {
+            setStatus('Error ' + res.status + ': ' + (data.error || res.statusText), 'err');
+            return;
+          }
+          if (!data.url) {
+            setStatus('Unexpected response (no url). Is the backend running on <code>' + base + '</code>?', 'err');
+            return;
+          }
+          setStatus('Redirecting to eWeLink…', 'ok');
+          window.location.href = data.url;
+        } catch (e) {
+          setStatus('Cannot reach backend at <code>' + base + '</code>. Start it with <code>cd backend &amp;&amp; npm start</code>. ' + (e.message || ''), 'err');
+        }
+      }
+
+      if (!localStorage.getItem(TOKEN_KEY)) {
+        setStatus('You are not logged in. <a href="login.html">Open login</a> first.', 'err');
+        btn.hidden = false;
+        btn.textContent = 'Go to login';
+        btn.onclick = function () { window.location.href = 'login.html'; };
+        return;
+      }
+
+      setStatus('Ready. Ensure <code>node backend/server.js</code> is running on the same host as <code>' + base + '</code>.');
+      btn.hidden = false;
+      btn.textContent = 'Start eWeLink login';
+      btn.onclick = startOAuth;
+    })();
+  </script>
+</body>
+</html>

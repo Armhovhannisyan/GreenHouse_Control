@@ -1,0 +1,4 @@
+backend/.env
+backend/node_modules/
+db/ewelink-oauth.json
+db/ewelink-oauth-pending.json
