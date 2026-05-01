@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const url = require('url');
 const crypto = require('crypto');
+const mqtt = require('mqtt');
 const Ewelink = require('ewelink-api');
 const ewelinkApp = require('./ewelink-app');
 
@@ -16,6 +17,21 @@ const WEATHER_CFG = {
   stationId: process.env.WEATHER_STATION_ID || 'IKOTAY9',
   units: process.env.WEATHER_UNITS || 's',
   apiKey: process.env.WEATHER_API_KEY || '4a09500e731f432b89500e731f532b68',
+};
+
+const ARANET_MQTT_CFG = {
+  url: String(process.env.ARANET_MQTT_URL || '').trim(),
+  topic: String(process.env.ARANET_MQTT_TOPIC || 'aranet/#').trim(),
+  username: String(process.env.ARANET_MQTT_USERNAME || '').trim(),
+  password: String(process.env.ARANET_MQTT_PASSWORD || '').trim(),
+  clientId: String(process.env.ARANET_MQTT_CLIENT_ID || '').trim(),
+};
+
+const aranetLatest = {
+  connected: false,
+  updatedAt: null,
+  lastTopic: null,
+  values: {},
 };
 
 function getSonoffCfg() {
@@ -125,6 +141,141 @@ function readClimateStrategy() {
 
 function writeClimateStrategy(doc) {
   fs.writeFileSync(CLIMATE_STRATEGY_FILE, JSON.stringify(doc, null, 2), 'utf8');
+}
+
+function toFiniteOrNull(v) {
+  var n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
+function mapAranetKey(rawKey) {
+  var key = String(rawKey || '').trim().toLowerCase();
+  if (!key) return null;
+  var aliases = {
+    temp: 'airTemp',
+    temperature: 'airTemp',
+    airtemp: 'airTemp',
+    air_temperature: 'airTemp',
+    humidity: 'humidity',
+    rh: 'humidity',
+    relative_humidity: 'humidity',
+    leaf_temp: 'leafTemp',
+    leaftemp: 'leafTemp',
+    leaf_temperature: 'leafTemp',
+    par: 'par',
+    par_sensor: 'par',
+    slab_ec: 'slabEc',
+    slabec: 'slabEc',
+    slab_scale: 'slabScale',
+    slabscale: 'slabScale',
+    plant_scale: 'plantScale',
+    plantscale: 'plantScale',
+    rtr: 'rtr',
+    plant_load_day: 'plantLoadDay',
+    plantloadday: 'plantLoadDay',
+  };
+  return aliases[key] || null;
+}
+
+function setAranetValue(k, v) {
+  var key = mapAranetKey(k);
+  var val = toFiniteOrNull(v);
+  if (!key || val == null) return;
+  aranetLatest.values[key] = val;
+}
+
+function updateAranetFromPayload(topic, payloadText) {
+  var text = String(payloadText || '').trim();
+  if (!text) return;
+  var parsed = null;
+  try {
+    parsed = JSON.parse(text);
+  } catch (_e) {
+    parsed = null;
+  }
+  if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+    Object.keys(parsed).forEach(function (k) {
+      setAranetValue(k, parsed[k]);
+    });
+  } else {
+    var keyFromTopic = String(topic || '').split('/').pop();
+    setAranetValue(keyFromTopic, text);
+  }
+  aranetLatest.updatedAt = new Date().toISOString();
+  aranetLatest.lastTopic = topic || null;
+}
+
+function calcVpdKpa(tempC, rhPct) {
+  var t = toFiniteOrNull(tempC);
+  var rh = toFiniteOrNull(rhPct);
+  if (t == null || rh == null || rh < 0 || rh > 100) return null;
+  var svp = 0.6108 * Math.exp((17.27 * t) / (t + 237.3));
+  return Number((svp * (1 - rh / 100)).toFixed(3));
+}
+
+function buildAranetSensorPayload() {
+  var v = aranetLatest.values || {};
+  var climateTemp = v.airTemp;
+  var humidity = v.humidity;
+  var leafTemp = v.leafTemp != null ? v.leafTemp : climateTemp;
+  var vpd = calcVpdKpa(leafTemp, humidity);
+  return {
+    mqtt: {
+      connected: Boolean(aranetLatest.connected),
+      updatedAt: aranetLatest.updatedAt,
+      topic: aranetLatest.lastTopic,
+    },
+    climate: {
+      temp: climateTemp,
+      humidity: humidity,
+      heating: null,
+      cooling: null,
+      indoorProbeName: 'Aranet MQTT',
+    },
+    precisionGrowing: {
+      leafTemp: leafTemp,
+      par: v.par != null ? v.par : null,
+      slabEc: v.slabEc != null ? v.slabEc : null,
+      slabScale: v.slabScale != null ? v.slabScale : null,
+      plantScale: v.plantScale != null ? v.plantScale : null,
+      rtr: v.rtr != null ? v.rtr : null,
+      plantLoadDay: v.plantLoadDay != null ? v.plantLoadDay : null,
+      vpd: vpd,
+    },
+    raw: Object.assign({}, v),
+  };
+}
+
+function startAranetMqttIngestor() {
+  if (!ARANET_MQTT_CFG.url) {
+    logEvent('info', '[mqtt] Aranet MQTT disabled (ARANET_MQTT_URL not set)');
+    return;
+  }
+  var opts = {};
+  if (ARANET_MQTT_CFG.username) opts.username = ARANET_MQTT_CFG.username;
+  if (ARANET_MQTT_CFG.password) opts.password = ARANET_MQTT_CFG.password;
+  if (ARANET_MQTT_CFG.clientId) opts.clientId = ARANET_MQTT_CFG.clientId;
+  var client = mqtt.connect(ARANET_MQTT_CFG.url, opts);
+  client.on('connect', function () {
+    aranetLatest.connected = true;
+    logEvent('info', '[mqtt] connected', { url: ARANET_MQTT_CFG.url, topic: ARANET_MQTT_CFG.topic });
+    client.subscribe(ARANET_MQTT_CFG.topic, function (err) {
+      if (err) {
+        logEvent('error', '[mqtt] subscribe failed', err && err.message ? err.message : err);
+      } else {
+        logEvent('info', '[mqtt] subscribed', { topic: ARANET_MQTT_CFG.topic });
+      }
+    });
+  });
+  client.on('message', function (topic, payload) {
+    updateAranetFromPayload(topic, payload.toString('utf8'));
+  });
+  client.on('close', function () {
+    aranetLatest.connected = false;
+  });
+  client.on('error', function (err) {
+    logEvent('error', '[mqtt] client error', err && err.message ? err.message : err);
+  });
 }
 
 function relayModeKey(deviceId, channel) {
@@ -766,6 +917,14 @@ const server = http.createServer(function (req, res) {
     }
   }
 
+  if (pathname.indexOf('/api/sensors/') === 0) {
+    const authUser = authUserFromReq(req);
+    if (!authUser) {
+      unauthorized(res);
+      return;
+    }
+  }
+
   if (pathname === '/api/weather/current') {
     const rows = getHistory(24 * 7);
     json(res, 200, toWeatherShape(rows));
@@ -780,6 +939,11 @@ const server = http.createServer(function (req, res) {
 
   if (pathname === '/api/weather/reports') {
     json(res, 200, buildReports());
+    return;
+  }
+
+  if (pathname === '/api/sensors/latest' && req.method === 'GET') {
+    json(res, 200, buildAranetSensorPayload());
     return;
   }
 
@@ -939,6 +1103,7 @@ const server = http.createServer(function (req, res) {
 });
 
 ensureDbFile();
+startAranetMqttIngestor();
 pollAndStore();
 setInterval(pollAndStore, WEATHER_POLL_MS);
 

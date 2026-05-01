@@ -2,6 +2,7 @@
   var chart = null;
   var hostEl = null;
   var canvasEl = null;
+  var rangeHours = 24;
 
   function parseStartMinutes(hhmm) {
     var m = /^(\d{1,2}):(\d{1,2})$/.exec(String(hhmm || '').trim());
@@ -121,10 +122,26 @@
     if (valueEl) valueEl.textContent = text;
   }
 
+  function bindRangeButtons() {
+    if (!hostEl) return;
+    hostEl.addEventListener('click', function (e) {
+      var btn = e.target.closest('.ts-btn[data-range]');
+      if (!btn || !hostEl.contains(btn)) return;
+      var next = Number(btn.getAttribute('data-range'));
+      if (!Number.isFinite(next) || (next !== 24 && next !== 72)) return;
+      rangeHours = next;
+      var all = hostEl.querySelectorAll('.ts-btn[data-range]');
+      for (var i = 0; i < all.length; i += 1) {
+        all[i].classList.toggle('active', Number(all[i].getAttribute('data-range')) === rangeHours);
+      }
+      refresh();
+    });
+  }
+
   async function refresh() {
     if (!canvasEl || typeof Chart === 'undefined') return;
     try {
-      var rows = await fetchRows(24);
+      var rows = await fetchRows(rangeHours);
       var schedule = buildPeriodSchedule();
       var labels = [];
       var cooling = [];
@@ -183,8 +200,20 @@
     hostEl = host;
     if (!hostEl) return;
     hostEl.innerHTML =
-      '<div class="weather-chart-card"><div class="weather-chart-canvas-wrap" style="height:340px"><canvas id="climateStrategyChartCanvas"></canvas></div></div>';
+      '<div class="weather-chart-card">' +
+      '<div class="weather-chart-head">' +
+      '<div class="weather-chart-head-left">' +
+      '<div class="weather-chart-title">Climate strategy chart</div>' +
+      '<div class="chart-timesel">' +
+      '<button class="ts-btn active" data-range="24">24h</button>' +
+      '<button class="ts-btn" data-range="72">3D</button>' +
+      '</div>' +
+      '</div>' +
+      '</div>' +
+      '<div class="weather-chart-canvas-wrap" style="height:340px"><canvas id="climateStrategyChartCanvas"></canvas></div>' +
+      '</div>';
     canvasEl = document.getElementById('climateStrategyChartCanvas');
+    bindRangeButtons();
     refresh();
   }
 

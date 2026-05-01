@@ -81,6 +81,14 @@
   margin: auto auto;
 }
 
+.climate-box--strategy-card .climate-title {
+  text-align: center;
+}
+
+.climate-box--strategy-card .climate-value-panel {
+  font-size: 19px;
+}
+
 /* Gauges use global .gauge-wrap / .gauge-svg from components.css (same as dashboard). */
 .climate-gauge-wrap {
   margin-bottom: 0;

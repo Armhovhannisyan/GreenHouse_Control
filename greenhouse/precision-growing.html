@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GreenCtrl — Precision Growing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+</head>
+<body>
+  <header id="app-header"></header>
+
+  <div class="layout">
+    <aside id="app-sidebar"></aside>
+
+    <main id="app-main" class="precision-growing-main">
+      <div class="page-header">precision growing</div>
+      <div class="status-bar" id="pgStatusBar"></div>
+      <div class="actions-bar" id="pgActionsBar"></div>
+      <div class="last-updated">Last refreshed: <span id="pgLastUpdated">—</span></div>
+
+      <section class="precision-growing-card">
+        <div class="precision-growing-chart-title">Plant metrics trend</div>
+        <div class="precision-growing-layout">
+          <div class="precision-growing-chart-wrap">
+            <canvas id="pgChartCanvas" aria-label="Precision growing chart"></canvas>
+          </div>
+          <aside class="precision-growing-filter" id="pgFilterPanel" aria-label="Chart parameters">
+            <div class="precision-growing-filter-title" title="Click to select/deselect all">Parameters</div>
+            <label class="pg-filter-item">
+              <input type="checkbox" data-series-key="drainage" checked />
+              <i class="pg-lg-dot pg-lg-dot--drain"></i>
+              <span>Drainage volume (mL)</span>
+            </label>
+            <label class="pg-filter-item">
+              <input type="checkbox" data-series-key="plantWeight" checked />
+              <i class="pg-lg-dot pg-lg-dot--weight"></i>
+              <span>Plant weight (g)</span>
+            </label>
+            <label class="pg-filter-item">
+              <input type="checkbox" data-series-key="slabMoisture" checked />
+              <i class="pg-lg-dot pg-lg-dot--slab"></i>
+              <span>Slab moisture (%)</span>
+            </label>
+          </aside>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/utils/helpers.js"></script>
+  <script src="js/utils/logger.js"></script>
+  <script src="js/components/header.js"></script>
+  <script src="js/components/sidebar.js"></script>
+  <script src="js/api/weather.js"></script>
+  <script src="js/api/sensors.js"></script>
+  <script src="js/pages/precision-growing.js"></script>
+</body>
+</html>

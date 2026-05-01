@@ -24,12 +24,23 @@
  */
 
 const SensorAPI = (() => {
+  const TOKEN_KEY = 'authToken.v1';
 
   /* ── helpers ── */
   async function getJSON(path) {
     const url = CONFIG.sensorBaseUrl + path;
     const res = await window.fetch(url, { signal: AbortSignal.timeout(4000) });
     if (!res.ok) throw new Error(`Sensor API ${res.status} at ${path}`);
+    return res.json();
+  }
+
+  async function getBackendJSON(path) {
+    var base = (CONFIG.backendBaseUrl || '').replace(/\/$/, '');
+    if (!base) throw new Error('Backend URL is not configured');
+    var token = window.localStorage.getItem(TOKEN_KEY) || '';
+    var headers = token ? { Authorization: 'Bearer ' + token } : {};
+    var res = await window.fetch(base + path, { headers: headers, cache: 'no-store', signal: AbortSignal.timeout(4000) });
+    if (!res.ok) throw new Error(`Backend ${res.status} at ${path}`);
     return res.json();
   }
 
@@ -137,6 +148,35 @@ const SensorAPI = (() => {
     return Object.assign({}, sensors, { climate: climate });
   }
 
+  async function overlayBackendAranetSensors(sensors) {
+    var payload = null;
+    try {
+      payload = await getBackendJSON('/api/sensors/latest');
+    } catch (_e) {
+      return sensors;
+    }
+    if (!payload || typeof payload !== 'object') return sensors;
+
+    var out = Object.assign({}, sensors);
+    var climate = Object.assign({}, out.climate || {});
+    var pClimate = payload.climate && typeof payload.climate === 'object' ? payload.climate : null;
+    if (pClimate) {
+      if (pClimate.temp != null && Number.isFinite(Number(pClimate.temp))) climate.temp = Helpers.round(Number(pClimate.temp), 1);
+      if (pClimate.humidity != null && Number.isFinite(Number(pClimate.humidity))) climate.humidity = Math.round(Number(pClimate.humidity));
+      if (pClimate.indoorProbeName) climate.indoorProbeName = String(pClimate.indoorProbeName);
+      if (pClimate.heating) climate.heating = String(pClimate.heating);
+      if (pClimate.cooling) climate.cooling = String(pClimate.cooling);
+    }
+    out.climate = climate;
+    if (payload.precisionGrowing && typeof payload.precisionGrowing === 'object') {
+      out.precisionGrowing = Object.assign({}, payload.precisionGrowing);
+    }
+    if (payload.mqtt && typeof payload.mqtt === 'object') {
+      out.mqtt = Object.assign({}, payload.mqtt);
+    }
+    return out;
+  }
+
   /* ────────────────────────────────────────────────────────────
      PUBLIC API
   ──────────────────────────────────────────────────────────── */
@@ -167,7 +207,8 @@ const SensorAPI = (() => {
         base = simulate(weatherCurrent);
       }
     }
-    return overlaySonoffClimate(base);
+    var withSonoff = await overlaySonoffClimate(base);
+    return overlayBackendAranetSensors(withSonoff);
   }
 
   return { fetchAll };

@@ -6,6 +6,28 @@
  */
 
 const Cards = (() => {
+  function updatePrecisionGrowingCard(climate, precisionGrowing) {
+    const leafTemp = Number(precisionGrowing && precisionGrowing.leafTemp != null ? precisionGrowing.leafTemp : climate.temp);
+    const rh = Number(climate.humidity);
+    const leafTempOk = Number.isFinite(leafTemp);
+    const vpdFromPg = Number(precisionGrowing && precisionGrowing.vpd);
+    const vpdFromPgOk = Number.isFinite(vpdFromPg);
+    const rhOk = Number.isFinite(rh);
+
+    const [cMin, cMax] = CONFIG.gaugeRanges.climate;
+    Gauge.update('piGauge', leafTempOk ? leafTemp : 0, cMin, cMax, leafTempOk ? leafTemp.toFixed(1) : '—');
+    Helpers.setStat('piLeafTemp', leafTempOk ? `${leafTemp.toFixed(1)} °C` : '— °C');
+    if (vpdFromPgOk) {
+      Helpers.setStat('piVpd', `${vpdFromPg.toFixed(2)} kPa`, 'ok');
+    } else if (leafTempOk && rhOk && rh >= 0 && rh <= 100) {
+      const svp = 0.6108 * Math.exp((17.27 * leafTemp) / (leafTemp + 237.3));
+      const vpd = svp * (1 - rh / 100);
+      Helpers.setStat('piVpd', `${vpd.toFixed(2)} kPa`, 'ok');
+    } else {
+      Helpers.setStat('piVpd', '— kPa', 'off');
+    }
+
+  }
 
   /* ── Initial render ── */
   function render() {
@@ -111,6 +133,22 @@ const Cards = (() => {
           </div>
         </div>
       </div>
+
+      <!-- PRECISION GROWING -->
+      <div class="card card-clickable" id="precisionGrowingCard" title="Open Precision Growing details" role="button" tabindex="0">
+        <div class="card-title"><span class="card-icon">🌿</span> Precision Growing</div>
+        ${Gauge.html({ id: 'piGauge', min: cMin, max: cMax, unit: '°C', color: 'green' })}
+        <div class="card-stats">
+          <div class="stat">
+            <div class="stat-label">Leaf temp</div>
+            <div class="stat-value font-mono" id="piLeafTemp">— °C</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">VPD</div>
+            <div class="stat-value font-mono" id="piVpd">— kPa</div>
+          </div>
+        </div>
+      </div>
     `;
 
     const weatherCard = document.getElementById('weatherZoneCard');
@@ -148,6 +186,19 @@ const Cards = (() => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           window.location.href = 'manual-override.html';
+        }
+      });
+    }
+
+    const pgCard = document.getElementById('precisionGrowingCard');
+    if (pgCard) {
+      pgCard.addEventListener('click', () => {
+        window.location.href = 'precision-growing.html';
+      });
+      pgCard.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          window.location.href = 'precision-growing.html';
         }
       });
     }
@@ -197,6 +248,8 @@ const Cards = (() => {
     Gauge.update('moGauge', climate.temp, cMin, cMax, climate.temp);
     Helpers.setStat('moStatSource', 'Relays', 'ok');
     Helpers.setStat('moStatHint', 'Open page', 'off');
+
+    updatePrecisionGrowingCard(climate, sensors && sensors.precisionGrowing ? sensors.precisionGrowing : null);
 
   }
 

@@ -87,6 +87,7 @@ const ClimatePage = (() => {
     tileMeta.push({ id, title, rows, slug: SECTION_SLUGS[title] || 'climate-strategy' });
     const rowsHtml = Array.isArray(rows) ? rows.map((r) => `<div>${r}</div>`).join('') : '';
     const centeredPanelClass = !gauge && !rowsHtml ? ' climate-box--centered-panel' : '';
+    const strategyCardClass = title === 'Climate strategy' ? ' climate-box--strategy-card' : '';
     const visual = gauge
       ? `<div class="climate-gauge-wrap">${Gauge.html({
         id: gauge.id,
@@ -97,7 +98,7 @@ const ClimatePage = (() => {
       })}</div>`
       : `<div class="climate-value-panel">${valueHtml}</div>`;
     return `
-      <section class="climate-box clickable${centeredPanelClass}" id="${id}" role="button" tabindex="0" title="Open ${title} page">
+      <section class="climate-box clickable${centeredPanelClass}${strategyCardClass}" id="${id}" role="button" tabindex="0" title="Open ${title} page">
         <div class="climate-title">${title}</div>
         ${visual}
         ${rowsHtml ? `<div class="climate-kv">${rowsHtml}</div>` : ''}
@@ -109,10 +110,10 @@ const ClimatePage = (() => {
     const s = String(shortLabel || '-').trim();
     if (!s || s === '-') return 'Period -';
     const transition = /^P(\d+)\s*->\s*P(\d+)$/i.exec(s);
-    if (transition) return `Period ${transition[1]} -> Period ${transition[2]}`;
+    if (transition) return `Period P${transition[1]}-P${transition[2]}`;
     const single = /^P(\d+)$/i.exec(s);
-    if (single) return `Period ${single[1]}`;
-    return s;
+    if (single) return `Period P${single[1]}`;
+    return `Period ${s}`;
   }
 
   function renderStatusBar(source, indoorProbeName) {
