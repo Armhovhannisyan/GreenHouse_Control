@@ -1,0 +1,625 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "id": 99,
+      "type": "text",
+      "title": "",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 3
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "### Why charts were empty\nYour bucket **`greenhouse`** currently has data mainly under **`aranet_mqtt`** / **`value_str`** (JSON strings, **`suffix`** = `json_measurements`).\nCharts that query **`weather`**, **`aranet_state`**, or **`aranet_sensor`** stay empty until the backend also writes those measurements.\n\n**Below:** parsed JSON series for sensors **`501948`** (pulses / cumulative), **`501AA0`** (weight kg + plant load JSON below), **`6036FB`** (vwc). Edit IDs in `grafana/dashboards/gen-overview.mjs` if your Aranet IDs differ, then run `node gen-overview.mjs` from that folder."
+      },
+      "pluginVersion": "11.4.0"
+    },
+    {
+      "id": 98,
+      "type": "table",
+      "title": "Latest MQTT rows (aranet_mqtt / value_str)",
+      "gridPos": {
+        "x": 0,
+        "y": 3,
+        "w": 24,
+        "h": 5
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influx-greenhouse"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "cellHeight": "sm",
+        "showHeader": true,
+        "footer": {
+          "show": false
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-greenhouse"
+          },
+          "refId": "A",
+          "format": "table",
+          "query": "from(bucket: \"greenhouse\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"aranet_mqtt\")\n  |> limit(n: 50)"
+        }
+      ]
+    },
+    {
+      "id": 200,
+      "type": "row",
+      "title": "Aranet JSON (from MQTT value_str)",
+      "gridPos": {
+        "x": 0,
+        "y": 8,
+        "w": 24,
+        "h": 1
+      },
+      "collapsed": false
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "Slab weight (kg) · sensor 501AA0",
+      "gridPos": {
+        "x": 0,
+        "y": 9,
+        "w": 8,
+        "h": 8
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influx-greenhouse"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "drawStyle": "line",
+            "fillOpacity": 14,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 4,
+            "showPoints": "never",
+            "spanNulls": 3600000
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "mean",
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-greenhouse"
+          },
+          "query": "import \"experimental/json\"\n\nfrom(bucket: \"greenhouse\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) =>\n    r[\"_measurement\"] == \"aranet_mqtt\"\n      and r[\"_field\"] == \"value_str\"\n      and r[\"suffix\"] == \"json_measurements\"\n      and r[\"sensor\"] == \"501AA0\"\n  )\n  |> map(fn: (r) => {\n    j = json.parse(data: bytes(v: r._value))\n    return { r with _value: float(v: string(v: j.weight)), _field: \"weight_slab\" }\n  })\n  |> filter(fn: (r) => exists r._value)\n  |> aggregateWindow(every: 2m, fn: mean, createEmpty: false)\n  |> yield(name: \"mean\")",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "Substrate VWC · sensor 6036FB",
+      "gridPos": {
+        "x": 8,
+        "y": 9,
+        "w": 8,
+        "h": 8
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influx-greenhouse"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "drawStyle": "line",
+            "fillOpacity": 14,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 4,
+            "showPoints": "never",
+            "spanNulls": 3600000
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "mean",
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-greenhouse"
+          },
+          "query": "import \"experimental/json\"\n\nfrom(bucket: \"greenhouse\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) =>\n    r[\"_measurement\"] == \"aranet_mqtt\"\n      and r[\"_field\"] == \"value_str\"\n      and r[\"suffix\"] == \"json_measurements\"\n      and r[\"sensor\"] == \"6036FB\"\n  )\n  |> map(fn: (r) => {\n    j = json.parse(data: bytes(v: r._value))\n    return { r with _value: float(v: string(v: j.vwc)), _field: \"vwc_sub\" }\n  })\n  |> filter(fn: (r) => exists r._value)\n  |> aggregateWindow(every: 2m, fn: mean, createEmpty: false)\n  |> yield(name: \"mean\")",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "type": "timeseries",
+      "title": "Drainage pulse counter (cumulative) · sensor 501948",
+      "gridPos": {
+        "x": 16,
+        "y": 9,
+        "w": 8,
+        "h": 8
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influx-greenhouse"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "drawStyle": "line",
+            "fillOpacity": 14,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 4,
+            "showPoints": "never",
+            "spanNulls": 3600000
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "mean",
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-greenhouse"
+          },
+          "query": "import \"experimental/json\"\n\nfrom(bucket: \"greenhouse\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) =>\n    r[\"_measurement\"] == \"aranet_mqtt\"\n      and r[\"_field\"] == \"value_str\"\n      and r[\"suffix\"] == \"json_measurements\"\n      and r[\"sensor\"] == \"501948\"\n  )\n  |> map(fn: (r) => {\n    j = json.parse(data: bytes(v: r._value))\n    return { r with _value: float(v: string(v: j.pulsescumulative)), _field: \"pulsescumulative_drain\" }\n  })\n  |> filter(fn: (r) => exists r._value)\n  |> aggregateWindow(every: 2m, fn: mean, createEmpty: false)\n  |> yield(name: \"mean\")",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "type": "timeseries",
+      "title": "RSSI (dBm) — all json_measurements sensors",
+      "gridPos": {
+        "x": 0,
+        "y": 17,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influx-greenhouse"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "drawStyle": "line",
+            "fillOpacity": 14,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 4,
+            "showPoints": "never",
+            "spanNulls": 3600000
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "mean",
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-greenhouse"
+          },
+          "query": "import \"experimental/json\"\n\nfrom(bucket: \"greenhouse\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) =>\n    r[\"_measurement\"] == \"aranet_mqtt\"\n      and r[\"_field\"] == \"value_str\"\n      and r[\"suffix\"] == \"json_measurements\"\n  )\n  |> map(fn: (r) => {\n    j = json.parse(data: bytes(v: r._value))\n    return { r with _value: float(v: string(v: j.rssi)), _field: \"rssi\" }\n  })\n  |> filter(fn: (r) => exists r._value and r._value > -130.0 and r._value < 0.0)\n  |> aggregateWindow(every: 2m, fn: mean, createEmpty: false)\n  |> yield(name: \"mean\")",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "type": "timeseries",
+      "title": "Battery (V) — all json_measurements sensors",
+      "gridPos": {
+        "x": 12,
+        "y": 17,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influx-greenhouse"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "drawStyle": "line",
+            "fillOpacity": 14,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 4,
+            "showPoints": "never",
+            "spanNulls": 3600000
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "mean",
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-greenhouse"
+          },
+          "query": "import \"experimental/json\"\n\nfrom(bucket: \"greenhouse\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) =>\n    r[\"_measurement\"] == \"aranet_mqtt\"\n      and r[\"_field\"] == \"value_str\"\n      and r[\"suffix\"] == \"json_measurements\"\n  )\n  |> map(fn: (r) => {\n    j = json.parse(data: bytes(v: r._value))\n    return { r with _value: float(v: string(v: j.battery)), _field: \"battery_V\" }\n  })\n  |> filter(fn: (r) => exists r._value and r._value > 0.0 and r._value < 5.0)\n  |> aggregateWindow(every: 2m, fn: mean, createEmpty: false)\n  |> yield(name: \"mean\")",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 201,
+      "type": "row",
+      "title": "Outdoor weather (only if measurement `weather` exists)",
+      "gridPos": {
+        "x": 0,
+        "y": 25,
+        "w": 24,
+        "h": 1
+      },
+      "collapsed": false
+    },
+    {
+      "id": 20,
+      "type": "timeseries",
+      "title": "PWS temperature & RH (weather)",
+      "gridPos": {
+        "x": 0,
+        "y": 26,
+        "w": 24,
+        "h": 7
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influx-greenhouse"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "drawStyle": "line",
+            "fillOpacity": 14,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 4,
+            "showPoints": "never",
+            "spanNulls": 3600000
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "mean",
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-greenhouse"
+          },
+          "query": "from(bucket: \"greenhouse\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"weather\")\n  |> filter(fn: (r) => r[\"_field\"] == \"temperature_2m\" or r[\"_field\"] == \"relative_humidity_2m\")\n  |> aggregateWindow(every: 2m, fn: mean, createEmpty: false)\n  |> yield(name: \"mean\")",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 202,
+      "type": "row",
+      "title": "Plant load — daily change (midnight vs previous midnight)",
+      "gridPos": {
+        "x": 0,
+        "y": 33,
+        "w": 24,
+        "h": 1
+      },
+      "collapsed": false
+    },
+    {
+      "id": 30,
+      "type": "barchart",
+      "title": "Plant load Δ per day (harvest-adjusted) · sensor 501AA0 · UTC midnight",
+      "description": "Each bar = (last reading + harvest offsets) − first reading **within** that calendar day. A **harvest** is a drop ≥ **0.05** (kg) from the trailing peak; that mass is added back so tomato picking does not look like negative growth. JSON: `plantLoadDay` / `plant_load_day`, else **`weight`**. Edit **PLANT_LOAD_HARVEST_DROP_THRESHOLD_KG** in `gen-overview.mjs` (use **50** if values are grams). Set **PLANT_LOAD_DAY_OFFSET_HOURS** for local midnight.",
+      "gridPos": {
+        "x": 0,
+        "y": 34,
+        "w": 24,
+        "h": 10
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influx-greenhouse"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 3,
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "custom": {
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "barRadius": 0.06,
+        "barWidth": 0.86,
+        "fullHighlight": false,
+        "groupWidth": 0.72,
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false,
+          "calcs": []
+        },
+        "orientation": "vertical",
+        "showValue": "auto",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xField": "_time",
+        "yField": "_value",
+        "xTickLabelRotation": -35
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-greenhouse"
+          },
+          "query": "import \"experimental/json\"\nimport \"date\"\nimport \"timezone\"\n\noption location = timezone.fixed(offset: 0h)\n\nfrom(bucket: \"greenhouse\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) =>\n    r[\"_measurement\"] == \"aranet_mqtt\"\n      and r[\"_field\"] == \"value_str\"\n      and r[\"suffix\"] == \"json_measurements\"\n      and r[\"sensor\"] == \"501AA0\"\n  )\n  |> map(fn: (r) => {\n    j = json.parse(data: bytes(v: r._value))\n    s =\n      if exists j.plantLoadDay then string(v: j.plantLoadDay)\n      else if exists j.plant_load_day then string(v: j.plant_load_day)\n      else if exists j.weight then string(v: j.weight)\n      else \"\"\n    v =\n      if s != \"\" and s != \"<nil>\" then float(v: s)\n      else -1.0\n    return { r with _value: v }\n  })\n  |> filter(fn: (r) => r._value >= 0.0)\n  |> map(fn: (r) => ({ r with day: date.truncate(t: r._time, unit: 1d, location: location) }))\n  |> group(columns: [\"day\"])\n  |> sort(columns: [\"_time\"])\n  |> reduce(\n    identity: {\n      i: 0,\n      firstV: 0.0,\n      lastV: 0.0,\n      peak: 0.0,\n      sumH: 0.0,\n      day: time(v: \"1970-01-01T00:00:00Z\"),\n    },\n    fn: (r, acc) => {\n      i2 = acc.i + 1\n      firstV = if acc.i == 0 then r._value else acc.firstV\n      lastV = r._value\n      peakNext =\n        if acc.i == 0 then\n          r._value\n        else if r._value > acc.peak then\n          r._value\n        else if acc.peak - r._value >= 0.05 then\n          r._value\n        else\n          acc.peak\n      sumHNext =\n        if acc.i == 0 then\n          0.0\n        else if r._value > acc.peak then\n          acc.sumH\n        else if acc.peak - r._value >= 0.05 then\n          acc.sumH + (acc.peak - r._value)\n        else\n          acc.sumH\n      dayNext = if acc.i == 0 then r.day else acc.day\n      return {\n        i: i2,\n        firstV: firstV,\n        lastV: lastV,\n        peak: peakNext,\n        sumH: sumHNext,\n        day: dayNext,\n      }\n    },\n  )\n  |> map(fn: (r) => ({\n    _time: r.day,\n    _value: r.lastV + r.sumH - r.firstV,\n    _field: \"daily_delta\",\n    _measurement: \"plant_load_bar\",\n  }))\n  |> yield(name: \"plant_load_daily_delta\")",
+          "refId": "A",
+          "format": "time_series"
+        }
+      ],
+      "pluginVersion": "11.4.0"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "style": "dark",
+  "tags": [
+    "greenhouse",
+    "greenctrl",
+    "influx",
+    "aranet_mqtt"
+  ],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-7d",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Greenhouse — MQTT / Influx",
+  "uid": "greenhouse-overview",
+  "version": 1,
+  "weekStart": ""
+}

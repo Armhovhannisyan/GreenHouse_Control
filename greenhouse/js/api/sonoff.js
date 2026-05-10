@@ -112,13 +112,27 @@ const SonoffAPI = (() => {
     }
   }
 
-  async function controlRelay(deviceId, state, channel) {
+  async function controlRelay(deviceId, state, channel, sourceOrOptions) {
+    var source = 'manual-override';
+    var percentage = null;
+    if (sourceOrOptions && typeof sourceOrOptions === 'object') {
+      source = String(sourceOrOptions.source || 'manual-override').toLowerCase();
+      if (sourceOrOptions.percentage != null && sourceOrOptions.percentage !== '') {
+        var n = Number(sourceOrOptions.percentage);
+        if (Number.isFinite(n)) {
+          percentage = Math.max(0, Math.min(100, Math.round(n)));
+        }
+      }
+    } else {
+      source = String(sourceOrOptions || 'manual-override').toLowerCase();
+    }
     var payload = {
       deviceId: String(deviceId || ''),
       state: String(state || '').toLowerCase(),
       channel: channel == null ? 1 : Number(channel),
-      source: 'manual-override',
+      source: source,
     };
+    if (percentage != null) payload.percentage = percentage;
     var res = await authFetch(apiUrl('/api/sonoff/control'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -143,11 +157,116 @@ const SonoffAPI = (() => {
     return res.json();
   }
 
+  async function startVentMove(job) {
+    var payload = Object.assign({}, job || {});
+    var res = await authFetch(apiUrl('/api/sonoff/vent-move'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      var text = await res.text().catch(function () { return ''; });
+      throw new Error(text || ('Vent move HTTP ' + res.status));
+    }
+    return res.json();
+  }
+
+  async function fetchVentState() {
+    var res = await authFetch(apiUrl('/api/sonoff/vent-state'), { cache: 'no-store' });
+    if (!res.ok) throw new Error('Vent state HTTP ' + res.status);
+    return res.json();
+  }
+
+  async function updateVentState(patch) {
+    var res = await authFetch(apiUrl('/api/sonoff/vent-state'), {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(Object.assign({}, patch || {})),
+    });
+    if (!res.ok) throw new Error('Vent state update HTTP ' + res.status);
+    return res.json();
+  }
+
+  async function writeVentilationTemps(sample) {
+    var payload = Object.assign({}, sample || {});
+    var res = await authFetch(apiUrl('/api/influx/ventilation-temps'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error('Influx ventilation temps HTTP ' + res.status);
+    return res.json();
+  }
+
+  async function fetchVentilationHistory(hours) {
+    var h = Number(hours);
+    var qHours = Number.isFinite(h) && h > 0 ? Math.min(14 * 24, Math.round(h)) : 6;
+    var res = await authFetch(apiUrl('/api/influx/ventilation-history?hours=' + qHours), { cache: 'no-store' });
+    if (!res.ok) throw new Error('Influx ventilation history HTTP ' + res.status);
+    return res.json();
+  }
+
+  async function fetchVentilationPidState() {
+    var res = await authFetch(apiUrl('/api/ventilation/pid-state'), { cache: 'no-store' });
+    if (!res.ok) throw new Error('Ventilation PID state HTTP ' + res.status);
+    return res.json();
+  }
+
+  async function updateVentilationPidConfig(patch) {
+    var res = await authFetch(apiUrl('/api/ventilation/pid-config'), {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(Object.assign({}, patch || {})),
+    });
+    if (!res.ok) throw new Error('Ventilation PID config HTTP ' + res.status);
+    return res.json();
+  }
+
+  async function setVentilationMode(mode) {
+    var res = await authFetch(apiUrl('/api/ventilation/mode'), {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mode: String(mode || '').toLowerCase() === 'manual' ? 'manual' : 'automatic' }),
+    });
+    if (!res.ok) throw new Error('Ventilation mode HTTP ' + res.status);
+    return res.json();
+  }
+
+  async function setVentilationManualTarget(targetPct) {
+    var res = await authFetch(apiUrl('/api/ventilation/manual-target'), {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ targetPct: Number(targetPct) }),
+    });
+    if (!res.ok) throw new Error('Ventilation manual target HTTP ' + res.status);
+    return res.json();
+  }
+
+  async function setVentilationManualHold(extendMs) {
+    var res = await authFetch(apiUrl('/api/ventilation/manual-hold'), {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ extendMs: Number(extendMs) }),
+    });
+    if (!res.ok) throw new Error('Ventilation manual hold HTTP ' + res.status);
+    return res.json();
+  }
+
   return {
     fetchIndoorClimate,
     fetchRelayDevices,
     fetchRelayDevicesWithStatus,
     controlRelay,
     setRelayMode,
+    startVentMove,
+    fetchVentState,
+    updateVentState,
+    fetchVentilationHistory,
+    writeVentilationTemps,
+    fetchVentilationPidState,
+    updateVentilationPidConfig,
+    setVentilationMode,
+    setVentilationManualTarget,
+    setVentilationManualHold,
   };
 })();

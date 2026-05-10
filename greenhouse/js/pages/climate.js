@@ -14,6 +14,215 @@ const ClimatePage = (() => {
     'Crop treatment': 'crop-treatment',
   };
 
+  const VENTILATION_STATUS_STORAGE_KEY = 'ventilationStatus.v1';
+  let climateVentBarInterval = null;
+  /** @type {{ actual: number|null, calculated: number|null, workerManual?: boolean }|null} */
+  let lastVentStateRemote = null;
+
+  function readClimateVentFromStorage() {
+    try {
+      const raw = window.localStorage.getItem(VENTILATION_STATUS_STORAGE_KEY);
+      if (!raw) {
+        return { actual: 0, calculated: 0, orientation: 'wind', isManual: false };
+      }
+      const o = JSON.parse(raw);
+      const v0 = o && o.vents && o.vents[0] ? o.vents[0] : {};
+      const actual = Number(v0.actualVentPositionPct);
+      const calculated = Number(v0.calculatedVentPositionPct);
+      const orientRaw = typeof v0.ventOrientation === 'string' ? v0.ventOrientation.trim() : '';
+      let isManual = false;
+      if (o && String(o.ventPidWorkerMode || '').toLowerCase() === 'manual') isManual = true;
+      if (!isManual) {
+        try {
+          if (
+            String(window.localStorage.getItem('ventilationUiMode.v1') || '')
+              .trim()
+              .toLowerCase() === 'manual'
+          ) {
+            isManual = true;
+          }
+        } catch (_e2) {
+          /* ignore */
+        }
+      }
+      if (!isManual && o && String(o.ventMode || '').toLowerCase() === 'manual') isManual = true;
+      return {
+        actual: Number.isFinite(actual) ? actual : 0,
+        calculated: Number.isFinite(calculated) ? calculated : 0,
+        orientation: orientRaw || 'wind',
+        isManual,
+      };
+    } catch (_e) {
+      return { actual: 0, calculated: 0, orientation: 'wind', isManual: false };
+    }
+  }
+
+  function formatVentOrientCardLabel(orient) {
+    const s = String(orient || '').trim();
+    if (!s) return '—';
+    const lower = s.toLowerCase();
+    if (lower.includes('lee')) return 'Lee';
+    if (lower.includes('wind')) return 'Wind';
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  }
+
+  function climateVentPrivaAsideHtml() {
+    const v = readClimateVentFromStorage();
+    const pct = Math.max(0, Math.min(100, v.actual));
+    const display = Math.round(pct * 10) / 10;
+    return (
+      '<div class="climate-vent-priva" aria-label="Actual vent position">' +
+      '<div class="climate-vent-priva-value" id="climateVentBarValue">' +
+      display +
+      '</div>' +
+      '<div class="climate-vent-priva-track">' +
+      '<div class="climate-vent-priva-fill" id="climateVentBarFill" style="height:' +
+      pct +
+      '%"></div>' +
+      '</div>' +
+      '<div class="climate-vent-priva-caption"><span>Vent position</span></div>' +
+      '</div>'
+    );
+  }
+
+  function updateClimateVentBarFromStorage() {
+    const v = readClimateVentFromStorage();
+    const remote = lastVentStateRemote;
+    let actual = Number(v.actual);
+    if (remote && Number.isFinite(Number(remote.actual))) {
+      actual = Number(remote.actual);
+    }
+    let calculated = Number(v.calculated);
+    if (remote && Number.isFinite(Number(remote.calculated))) {
+      calculated = Number(remote.calculated);
+    }
+    const pct = Math.max(0, Math.min(100, actual));
+    const display = Math.round(pct * 10) / 10;
+    const orient = formatVentOrientCardLabel(v.orientation);
+    const calcDisp = Math.round(Math.max(0, Math.min(100, calculated)) * 10) / 10;
+    const fill = document.getElementById('climateVentBarFill');
+    const valEl = document.getElementById('climateVentBarValue');
+    const kva = document.getElementById('climateVentKvActual');
+    const kvc = document.getElementById('climateVentKvCalc');
+    const kvo = document.getElementById('climateVentKvOrient');
+    if (fill) fill.style.height = `${pct}%`;
+    if (valEl) valEl.textContent = String(display);
+    if (kva) kva.textContent = `${display.toFixed(1)}%`;
+    if (kvc) kvc.textContent = `${calcDisp.toFixed(1)}%`;
+    if (kvo) kvo.textContent = orient;
+    const kvl = document.getElementById('climateVentKvCalcLabel');
+    const manualLabel =
+      (remote && remote.workerManual) || v.isManual;
+    if (kvl) kvl.textContent = manualLabel ? 'Manual target' : 'Calculated vent';
+  }
+
+  async function refreshClimateVentFromBackend() {
+    if (typeof SonoffAPI === 'undefined' || typeof SonoffAPI.fetchVentState !== 'function') return;
+    try {
+      const res = await SonoffAPI.fetchVentState();
+      const st = res && res.state ? res.state : null;
+      const job = res && res.activeJob ? res.activeJob : null;
+      const fromPct =
+        st && Number.isFinite(Number(st.lastKnownPct))
+          ? Math.max(0, Math.min(100, Number(st.lastKnownPct)))
+          : null;
+      const fullTravelMs =
+        st && Number.isFinite(Number(st.fullTravelMs))
+          ? Math.max(30000, Math.min(2 * 60 * 60 * 1000, Number(st.fullTravelMs)))
+          : 120000;
+      let actual = fromPct;
+      if (
+        job &&
+        Number.isFinite(Date.parse(String(job.startedAt || ''))) &&
+        Number.isFinite(Date.parse(String(job.stopAt || '')))
+      ) {
+        const startMs = Date.parse(String(job.startedAt));
+        const stopMs = Date.parse(String(job.stopAt));
+        const now = Date.now();
+        const progress = stopMs > startMs ? Math.max(0, Math.min(1, (now - startMs) / (stopMs - startMs))) : 1;
+        const pulseMs = Number(job.pulseMs) || Math.max(0, stopMs - startMs);
+        const deltaPct = Math.max(0, Math.min(100, (pulseMs / fullTravelMs) * 100));
+        const dir = String(job.direction || '').toLowerCase();
+        if (actual == null) actual = 0;
+        if (dir === 'open') actual = Math.min(100, actual + deltaPct * progress);
+        else if (dir === 'close') actual = Math.max(0, actual - deltaPct * progress);
+      }
+      let calculated = null;
+      let workerManualForRemote = false;
+      if (
+        typeof CONFIG !== 'undefined' &&
+        CONFIG.ventilationServerPidEnabled === true &&
+        typeof SonoffAPI.fetchVentilationPidState === 'function'
+      ) {
+        try {
+          const pid = await SonoffAPI.fetchVentilationPidState();
+          const worker = pid && pid.worker ? pid.worker : null;
+          const latest = worker && worker.latest ? worker.latest : null;
+          const workerManual =
+            worker &&
+            String(worker.mode || '').toLowerCase() === 'manual' &&
+            Number.isFinite(Number(worker.manualTargetPct));
+          workerManualForRemote = Boolean(workerManual);
+          let uiManual = false;
+          try {
+            uiManual =
+              String(window.localStorage.getItem('ventilationUiMode.v1') || '')
+                .trim()
+                .toLowerCase() === 'manual';
+          } catch (_e2) {
+            uiManual = false;
+          }
+          const actualForFb =
+            fromPct != null && Number.isFinite(Number(fromPct)) ? Number(fromPct) : 0;
+          if (workerManual) {
+            calculated = Math.max(0, Math.min(100, Number(worker.manualTargetPct)));
+          } else if (uiManual) {
+            try {
+              const rawTg = window.localStorage.getItem('ventilationManualTargetPct.v1');
+              const t = Number(rawTg);
+              calculated = Number.isFinite(t)
+                ? Math.max(0, Math.min(100, t))
+                : Math.max(0, Math.min(100, actualForFb));
+            } catch (_e3) {
+              calculated = Math.max(0, Math.min(100, actualForFb));
+            }
+          } else if (latest && Number.isFinite(Number(latest.calculatedVentPositionPct))) {
+            calculated = Math.max(0, Math.min(100, Number(latest.calculatedVentPositionPct)));
+          }
+        } catch (_e) {
+          /* ignore — keep calculated null and fall back to localStorage */
+        }
+      }
+      lastVentStateRemote = {
+        actual: Number.isFinite(Number(actual)) ? Number(actual) : null,
+        calculated: Number.isFinite(Number(calculated)) ? Number(calculated) : null,
+        workerManual: workerManualForRemote,
+      };
+    } catch (_err) {
+      lastVentStateRemote = null;
+    }
+  }
+
+  function stopClimateVentBarPoll() {
+    if (climateVentBarInterval) {
+      window.clearInterval(climateVentBarInterval);
+      climateVentBarInterval = null;
+    }
+  }
+
+  function startClimateVentBarPoll() {
+    stopClimateVentBarPoll();
+    const tick = function () {
+      refreshClimateVentFromBackend()
+        .catch(function () {})
+        .finally(function () {
+          updateClimateVentBarFromStorage();
+        });
+    };
+    tick();
+    climateVentBarInterval = window.setInterval(tick, 1000);
+  }
+
   function parseStartMinutes(hhmm) {
     const m = /^(\d{1,2}):(\d{1,2})$/.exec(String(hhmm || '').trim());
     if (!m) return null;
@@ -88,17 +297,32 @@ const ClimatePage = (() => {
     const rowsHtml = Array.isArray(rows) ? rows.map((r) => `<div>${r}</div>`).join('') : '';
     const centeredPanelClass = !gauge && !rowsHtml ? ' climate-box--centered-panel' : '';
     const strategyCardClass = title === 'Climate strategy' ? ' climate-box--strategy-card' : '';
-    const visual = gauge
-      ? `<div class="climate-gauge-wrap">${Gauge.html({
-        id: gauge.id,
-        min: gauge.min,
-        max: gauge.max,
-        unit: gauge.unit,
-        color: gauge.color || 'green',
-      })}</div>`
-      : `<div class="climate-value-panel">${valueHtml}</div>`;
+    const aside =
+      gauge && typeof gauge.asideHtml === 'string' && gauge.asideHtml.trim() ? gauge.asideHtml : '';
+    const asideOnly = Boolean(gauge && gauge.asideOnly === true && aside);
+    const ventCardClass = asideOnly ? ' climate-box--vent-card' : '';
+    const gaugeHtml =
+      gauge && !asideOnly
+        ? Gauge.html({
+          id: gauge.id,
+          min: gauge.min,
+          max: gauge.max,
+          unit: gauge.unit,
+          color: gauge.color || 'green',
+        })
+        : '';
+    let visual;
+    if (asideOnly) {
+      visual = `<div class="climate-gauge-visual climate-gauge-visual--vent-only">${aside}</div>`;
+    } else if (gauge) {
+      visual = aside
+        ? `<div class="climate-gauge-visual climate-gauge-visual--with-aside"><div class="climate-gauge-wrap climate-gauge-wrap--inline">${gaugeHtml}</div>${aside}</div>`
+        : `<div class="climate-gauge-wrap">${gaugeHtml}</div>`;
+    } else {
+      visual = `<div class="climate-value-panel">${valueHtml}</div>`;
+    }
     return `
-      <section class="climate-box clickable${centeredPanelClass}${strategyCardClass}" id="${id}" role="button" tabindex="0" title="Open ${title} page">
+      <section class="climate-box clickable${ventCardClass}${centeredPanelClass}${strategyCardClass}" id="${id}" role="button" tabindex="0" title="Open ${title} page">
         <div class="climate-title">${title}</div>
         ${visual}
         ${rowsHtml ? `<div class="climate-kv">${rowsHtml}</div>` : ''}
@@ -136,6 +360,7 @@ const ClimatePage = (() => {
       return;
     }
     Header.render();
+    stopClimateVentBarPoll();
     tileMeta.length = 0;
     let weather = {};
     let sensors = {};
@@ -169,9 +394,7 @@ const ClimatePage = (() => {
     const [cMin, cMax] = CONFIG.gaugeRanges.climate;
     const [hMin, hMax] = CONFIG.gaugeRanges.humidity;
     const [pctMin, pctMax] = CONFIG.gaugeRanges.percent;
-    const [windMin, windMax] = CONFIG.gaugeRanges.windSpeed;
     const humidityGauge = Number.isFinite(Number(humidity)) ? Number(humidity) : 0;
-    const windGauge = Number.isFinite(Number(wind)) ? Number(wind) : 0;
     const probeHint =
       sensors.climate && sensors.climate.indoorProbeName
         ? `Sensor: <b>${sensors.climate.indoorProbeName}</b>`
@@ -179,6 +402,8 @@ const ClimatePage = (() => {
 
     const currentPeriodLabel = await fetchCurrentPeriodLabel();
     const cardPeriodLabel = formatPeriodLabelForCard(currentPeriodLabel);
+    const ventSnap = readClimateVentFromStorage();
+    const ventCalcLabel = ventSnap.isManual ? 'Manual target' : 'Calculated vent';
     const html = [
       tile('Climate strategy', `<span>${cardPeriodLabel}</span>`, []),
       tile('Temperature', `${climateTemp}<span class="climate-unit">°C</span>`, [
@@ -199,10 +424,11 @@ const ClimatePage = (() => {
         'Cooling status',
         '<b>No cooling</b>',
       ], { id: 'clGaugeCooling', min: pctMin, max: pctMax, unit: '%', color: 'blue' }),
-      tile('Ventilation', `${Math.round(wind)}<span class="climate-unit"> m/s</span>`, [
-        'Vent orientation 1: <b>Wind</b>',
-        'Vent orientation 2: <b>Lee</b>',
-      ], { id: 'clGaugeVent', min: windMin, max: windMax, unit: 'm/s', color: 'blue' }),
+      tile('Ventilation', '', [
+        `Wind: <b>${Math.round(wind)} m/s</b>`,
+        `<span id="climateVentKvCalcLabel">${ventCalcLabel}</span>: <b id="climateVentKvCalc">${(Math.round(ventSnap.calculated * 10) / 10).toFixed(1)}%</b> · Actual: <b id="climateVentKvActual">${(Math.round(ventSnap.actual * 10) / 10).toFixed(1)}%</b>`,
+        `Vent 1 — <span>Orientation</span> <b id="climateVentKvOrient">${formatVentOrientCardLabel(ventSnap.orientation)}</b>`,
+      ], { asideOnly: true, asideHtml: climateVentPrivaAsideHtml() }),
       tile('Air circulation', `100<span class="climate-unit">%</span>`, [
         'Status',
         '<b>Humidity control</b>',
@@ -233,7 +459,7 @@ const ClimatePage = (() => {
       `${Math.round((outdoorTemp / 40) * 100)}%`
     );
     Gauge.update('clGaugeCooling', 0, pctMin, pctMax, '0%');
-    Gauge.update('clGaugeVent', windGauge, windMin, windMax, `${Math.round(windGauge)} m/s`);
+    startClimateVentBarPoll();
     Gauge.update('clGaugeAir', 100, pctMin, pctMax, '100%');
     Gauge.update('clGaugeCurtain', 100, pctMin, pctMax, '100%');
 
@@ -249,6 +475,14 @@ const ClimatePage = (() => {
         }
       });
     });
+  }
+
+  if (!window.__climateVentBarListeners) {
+    window.__climateVentBarListeners = true;
+    window.addEventListener('storage', (e) => {
+      if (e.key === VENTILATION_STATUS_STORAGE_KEY) updateClimateVentBarFromStorage();
+    });
+    window.addEventListener('ventilationStatusUpdated', updateClimateVentBarFromStorage);
   }
 
   if (document.readyState === 'loading') {

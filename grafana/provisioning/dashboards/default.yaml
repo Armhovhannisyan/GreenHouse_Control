@@ -1,0 +1,10 @@
+apiVersion: 1
+providers:
+  - name: Greenhouse dashboards
+    orgId: 1
+    folder: Greenhouse
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /etc/grafana/dashboards

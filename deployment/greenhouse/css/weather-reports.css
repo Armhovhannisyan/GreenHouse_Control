@@ -1,0 +1,359 @@
+.weather-page-wrap {
+  padding: 16px 28px 28px;
+}
+
+.weather-toolbar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.weather-chart-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 14px;
+  width: 100%;
+}
+
+.weather-chart-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.weather-chart-head-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.weather-chart-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.weather-chart-toggle-title {
+  cursor: pointer;
+  user-select: none;
+}
+
+.weather-chart-toggle-title:hover {
+  color: var(--teal);
+}
+
+.weather-chart-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.weather-chart-controls label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.weather-chart-controls select {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 12px;
+  background: #fff;
+}
+
+.weather-chart-canvas-wrap {
+  position: relative;
+  width: 100%;
+  height: 320px;
+}
+
+.weather-chart-canvas-wrap.collapsed {
+  display: none;
+}
+
+.weather-chart-layout {
+  display: flex;
+  gap: 14px;
+  height: 100%;
+}
+
+.weather-chart-main {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+}
+
+.quick-analysis {
+  width: 280px;
+  border-left: 1px solid var(--border);
+  padding-left: 12px;
+  overflow: auto;
+}
+
+.quick-analysis-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.quick-analysis-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.quick-analysis-toggle {
+  cursor: pointer;
+  user-select: none;
+}
+
+.quick-analysis-toggle:hover {
+  color: var(--teal);
+}
+
+.quick-analysis-time {
+  font-family: var(--mono);
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.qa-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.qa-toggle {
+  width: 11px;
+  height: 11px;
+  border: 1px solid rgba(0,0,0,.15);
+  border-radius: 2px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.qa-row.disabled .qa-toggle {
+  background: transparent !important;
+}
+
+.qa-row.disabled .qa-label,
+.qa-row.disabled .qa-value {
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+.qa-label {
+  flex: 1;
+}
+
+.qa-value {
+  font-family: var(--mono);
+  color: var(--text-secondary);
+}
+
+
+#weatherSingleChart {
+  width: 100%;
+  height: 100%;
+}
+
+@media (max-width: 900px) {
+  .weather-chart-card {
+    width: 100%;
+  }
+  .weather-chart-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .weather-chart-head-left {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .weather-chart-canvas-wrap {
+    height: 260px;
+  }
+  .weather-chart-layout {
+    flex-direction: column;
+  }
+  .quick-analysis {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid var(--border);
+    padding-left: 0;
+    padding-top: 10px;
+  }
+}
+
+.weather-report-block {
+  margin-bottom: 14px;
+  border: 1px solid #d7dfdb;
+  background: #fdfefd;
+}
+
+.weather-report-title {
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 8px 10px;
+  border-bottom: 1px solid #d7dfdb;
+  background: #edf2ed;
+  color: #1d2d36;
+}
+
+.weather-report-toggle-title {
+  cursor: pointer;
+  user-select: none;
+}
+
+.weather-report-toggle-title:hover {
+  color: var(--teal);
+}
+
+.weather-report-body.collapsed {
+  display: none;
+}
+
+.weather-status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 8px;
+  padding: 10px;
+}
+
+.weather-status-item {
+  border: 1px solid #e3e8e4;
+  border-radius: 6px;
+  background: #fff;
+  padding: 8px 10px;
+}
+
+.weather-status-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-bottom: 3px;
+}
+
+.weather-status-value {
+  font-size: 13px;
+  font-family: var(--mono);
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.weather-config-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.weather-config-row {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) 220px;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  border-bottom: 1px solid #e3e8e4;
+}
+
+.weather-config-label {
+  font-size: 12px;
+  color: var(--text-primary);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.weather-config-input,
+.weather-config-select {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 12px;
+  background: #fff;
+}
+
+.weather-config-actions {
+  display: flex;
+  gap: 8px;
+  padding: 10px;
+}
+
+.cfg-help {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid #b7c4cf;
+  color: #6b8090;
+  font-size: 11px;
+  line-height: 14px;
+  text-align: center;
+  cursor: help;
+  position: relative;
+  display: inline-block;
+  background: #fff;
+}
+
+.cfg-help-tip {
+  position: absolute;
+  left: 22px;
+  top: -6px;
+  width: min(420px, 70vw);
+  background: #1f2d36;
+  color: #fff;
+  font-size: 11px;
+  line-height: 1.35;
+  padding: 8px 10px;
+  border-radius: 6px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.2);
+  display: none;
+  z-index: 4;
+  white-space: normal;
+}
+
+.cfg-help:hover .cfg-help-tip,
+.cfg-help:focus .cfg-help-tip {
+  display: block;
+}
+
+.weather-report-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  table-layout: fixed;
+}
+
+.weather-report-table th,
+.weather-report-table td {
+  border-bottom: 1px solid #e3e8e4;
+  padding: 6px 10px;
+  text-align: left;
+}
+
+.weather-report-table th {
+  font-weight: 600;
+  color: #2f3d44;
+  background: #f2f6f2;
+}
+
+.weather-report-table th:nth-child(1),
+.weather-report-table td:nth-child(1) {
+  width: 58%;
+  text-align: left;
+}
+
+.weather-report-table th:nth-child(2),
+.weather-report-table td:nth-child(2),
+.weather-report-table th:nth-child(3),
+.weather-report-table td:nth-child(3) {
+  width: 21%;
+  text-align: center;
+  font-family: var(--mono);
+}

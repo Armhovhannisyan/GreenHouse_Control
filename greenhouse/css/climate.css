@@ -98,6 +98,105 @@
   margin-bottom: 14px;
 }
 
+.climate-gauge-visual--with-aside {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 0;
+}
+
+.climate-gauge-visual--with-aside .climate-gauge-wrap--inline .gauge-wrap {
+  margin-bottom: 14px;
+}
+
+.climate-gauge-visual--vent-only {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 140px;
+  padding: 4px 0 0;
+}
+
+/* Ventilation tile: column flex so gauge area can grow and content stays centered */
+.climate-box--vent-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.climate-box--vent-card .climate-title {
+  text-align: center;
+}
+
+.climate-box--vent-card .climate-gauge-visual--vent-only {
+  flex: 1 1 auto;
+  min-height: 160px;
+}
+
+.climate-box--vent-card .climate-kv {
+  text-align: center;
+}
+
+.climate-vent-priva {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding-bottom: 2px;
+}
+
+.climate-vent-priva-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.1;
+  margin-bottom: 6px;
+}
+
+/* Bar spans 80% of card inner width → 10% inset each side */
+.climate-vent-priva-track {
+  width: 80%;
+  max-width: 100%;
+  height: 112px;
+  background: #e8ecef;
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #dce3e8;
+}
+
+.climate-vent-priva-fill {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  background: linear-gradient(180deg, #2ec4b6 0%, #1a9d91 100%);
+  border-radius: 0 0 5px 5px;
+  min-height: 0;
+  transition: height 0.45s ease-out;
+}
+
+.climate-vent-priva-caption {
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-align: center;
+  line-height: 1.25;
+  width: 80%;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin-top: 8px;
+}
+
+.climate-vent-priva-caption span {
+  font-weight: 500;
+}
+
 .climate-unit {
   font-size: 18px;
   margin-left: 2px;
@@ -135,6 +234,334 @@
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 12px;
 }
+
+.climate-section-grid--accordion-stack {
+  display: block;
+}
+
+/* Ventilation: accordion fills page height (expanded panels grow). */
+body[data-section-slug="ventilation"] .layout {
+  min-height: 0;
+  flex: 1;
+}
+
+body[data-section-slug="ventilation"] #app-main {
+  min-height: 0;
+}
+
+body[data-section-slug="ventilation"] #app-main > .page-header {
+  padding: 8px 24px;
+  font-size: 18px;
+}
+
+body[data-section-slug="ventilation"] #app-main > .status-bar {
+  padding: 5px 24px;
+}
+
+body[data-section-slug="ventilation"] #app-main > .climate-section-wrap {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 6px 16px 12px;
+}
+
+body[data-section-slug="ventilation"] .climate-section-head {
+  flex-shrink: 0;
+  margin-bottom: 8px;
+}
+
+body[data-section-slug="ventilation"] .climate-section-grid--accordion-stack {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+body[data-section-slug="ventilation"] .climate-section-grid--accordion-stack > .weather-report-block {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  width: 100%;
+}
+
+body[data-section-slug="ventilation"] .climate-section-grid--accordion-stack > .weather-report-block:has(.weather-report-body:not(.collapsed)) {
+  flex: 1 1 0;
+  min-height: 0;
+}
+
+/* Status: hug content; Configuration: use remaining viewport height. */
+body[data-section-slug="ventilation"]
+  .climate-section-grid--accordion-stack
+  > .weather-report-block:has(#reportBody-ventilation-chart:not(.collapsed)) {
+  flex: 0 0 auto;
+  min-height: 0;
+}
+
+body[data-section-slug="ventilation"]
+  .climate-section-grid--accordion-stack
+  > .weather-report-block:has(#reportBody-ventilation-status:not(.collapsed)) {
+  flex: 0 0 auto;
+  min-height: 0;
+}
+
+body[data-section-slug="ventilation"]
+  .climate-section-grid--accordion-stack
+  > .weather-report-block:has(#reportBody-ventilation-configuration:not(.collapsed)) {
+  flex: 1 1 0;
+  min-height: 0;
+}
+
+body[data-section-slug="ventilation"] .climate-section-grid--accordion-stack > .weather-report-block:has(.weather-report-body:not(.collapsed)) .weather-report-body:not(.collapsed) {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* Status section: no inner scroll, full width, natural height. */
+body[data-section-slug="ventilation"] #reportBody-ventilation-status.weather-report-body:not(.collapsed) {
+  flex: 0 0 auto;
+  min-height: auto;
+  overflow-x: hidden;
+  overflow-y: visible;
+}
+
+body[data-section-slug="ventilation"] #reportBody-ventilation-chart.weather-report-body:not(.collapsed) {
+  flex: 0 0 auto;
+  min-height: auto;
+  overflow-x: hidden;
+  overflow-y: visible;
+}
+
+body[data-section-slug="ventilation"]
+  .climate-section-grid--accordion-stack
+  > .weather-report-block:has(.weather-report-body:not(.collapsed))
+  .weather-report-body:not(.collapsed)::-webkit-scrollbar {
+  display: none;
+}
+
+body[data-section-slug="ventilation"] .vent-config-pid-fieldset {
+  margin: 12px 10px 10px;
+  padding: 0 0 4px;
+  min-width: 0;
+  border: 1px solid #e3e8e4;
+  border-radius: 8px;
+  background: #fafcfb;
+}
+
+body[data-section-slug="ventilation"] .vent-config-pid-legend {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 0 6px;
+  color: var(--text-primary);
+}
+
+body[data-section-slug="ventilation"] .vent-config-priva-hint {
+  margin: 2px 10px 10px;
+  font-size: 11px;
+  line-height: 1.35;
+  color: var(--text-muted, #64748b);
+}
+
+body[data-section-slug="ventilation"] .vent-config-field-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+body[data-section-slug="ventilation"] .weather-config-input.vent-config-input-compact {
+  width: 5rem;
+  min-width: 4rem;
+  max-width: 100%;
+  padding: 4px 6px;
+  font-size: 11.5px;
+}
+
+body[data-section-slug="ventilation"] .vent-config-unit {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+/* Ventilation config: aligned columns, inputs immediately after label column (no stretched 1fr). */
+body[data-section-slug="ventilation"] .weather-config-row {
+  display: grid;
+  grid-template-columns: 13.25rem auto;
+  column-gap: 10px;
+  align-items: center;
+  justify-items: start;
+}
+
+body[data-section-slug="ventilation"] .weather-config-label {
+  justify-self: start;
+  text-align: left;
+}
+
+body[data-section-slug="ventilation"] .weather-config-row > .weather-config-input {
+  justify-self: start;
+}
+
+body[data-section-slug="ventilation"] .weather-config-row > .vent-config-field-wrap {
+  justify-self: start;
+}
+
+/* Ventilation — status panel (summary + vent table) */
+body[data-section-slug="ventilation"] .vent-status {
+  padding: 10px 10px 12px;
+  font-size: 12px;
+  color: var(--text-primary);
+  overflow-x: hidden;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+body[data-section-slug="ventilation"] .vent-status-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 28px;
+  padding: 4px 4px 14px;
+  border-bottom: 1px solid #e3e8e4;
+  margin-bottom: 0;
+}
+
+body[data-section-slug="ventilation"] .vent-status-metric {
+  min-width: 0;
+}
+
+body[data-section-slug="ventilation"] .vent-status-metric-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+  line-height: 1.3;
+}
+
+body[data-section-slug="ventilation"] .vent-status-metric-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #4a6572;
+  font-family: var(--mono);
+  line-height: 1.25;
+}
+
+body[data-section-slug="ventilation"] .vent-status-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: auto;
+  margin-top: 0;
+}
+
+body[data-section-slug="ventilation"] .vent-status-table thead th {
+  background: #edf2ed;
+  border: 1px solid #d7dfdb;
+  padding: 8px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: left;
+  color: #1d2d36;
+}
+
+body[data-section-slug="ventilation"] .vent-status-th-corner {
+  width: 2.25rem;
+  text-align: center;
+  vertical-align: middle;
+}
+
+body[data-section-slug="ventilation"] .vent-status-th-icon {
+  color: #2f7ab8;
+  font-size: 15px;
+  line-height: 1;
+}
+
+body[data-section-slug="ventilation"] .vent-status-table tbody th,
+body[data-section-slug="ventilation"] .vent-status-table tbody td {
+  border: 1px solid #e3e8e4;
+  padding: 7px 10px;
+  font-size: 12px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+body[data-section-slug="ventilation"] .vent-status-table tbody td {
+  font-family: var(--mono);
+  color: #4a6572;
+  font-weight: 500;
+  min-width: 0;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  box-sizing: border-box;
+}
+
+body[data-section-slug="ventilation"] .vent-status-table thead th:last-child {
+  min-width: 0;
+}
+
+body[data-section-slug="ventilation"] .vent-status-row-label {
+  font-weight: 500;
+  color: var(--text-primary);
+  background: #fff;
+  min-width: 8.5rem;
+  max-width: min(18rem, 42vw);
+  white-space: normal;
+  overflow-wrap: anywhere;
+  box-sizing: border-box;
+}
+
+body[data-section-slug="ventilation"] .vent-status-table .weather-config-input.vent-config-input-compact {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+body[data-section-slug="ventilation"] .vent-status-table select.weather-config-input.vent-config-input-compact {
+  width: auto;
+  min-width: 6.5rem;
+  max-width: 100%;
+}
+
+body[data-section-slug="ventilation"] .vent-chart-wrap {
+  padding: 10px;
+}
+
+body[data-section-slug="ventilation"] .vent-trend-chart-card {
+  margin-bottom: 0;
+}
+
+body[data-section-slug="ventilation"] .vent-chart-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(140px, 1fr));
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+body[data-section-slug="ventilation"] .vent-chart-metric {
+  border: 1px solid #d7dfdb;
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: #f9fcfa;
+}
+
+body[data-section-slug="ventilation"] .vent-chart-metric span {
+  display: block;
+  font-size: 11px;
+  color: #667085;
+}
+
+body[data-section-slug="ventilation"] .vent-chart-metric b {
+  display: block;
+  margin-top: 3px;
+  font-size: 13px;
+  color: #1d2d36;
+  font-family: var(--mono);
+}
+
 
 /* ── Climate strategy page (accordion) ─────────────────────── */
 .page-climate-strategy .main--climate-strategy {

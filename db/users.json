@@ -3,9 +3,14 @@
     {
       "id": "5899bcd243b56e34",
       "username": "grower",
-      "passwordHash": "8dd7b8ffea5c4e99d8cf585b8f2f985f24395fee3db286c8b3596d2d1e2e06abfa9e1c07f94783491588ae998110b8fbff88db4bbfb27f5f2c8256bd55c1ecfb",
-      "salt": "52fd09ea5093cca8acbb661adbffd6b9",
-      "createdAt": "2026-04-26T13:32:11.109Z"
+      "passwordHash": "96b4f007eadbf87dd974d01bb8100ca879ab3d4a8ef564d16617e1246b13bb25f7519b6f68d6ab7048639a29776cfb79824ce64e2c82f7ed7467e938e510df1b",
+      "salt": "e0bc6e03b7dbe3a681d5daec9394f2ba",
+      "createdAt": "2026-04-26T13:32:11.109Z",
+      "email": "grower@local.greenctrl",
+      "emailVerified": true,
+      "verifyCode": null,
+      "verifyCodeExpiresAt": null,
+      "isMasterUser": true
     },
     {
       "id": "02e1cb2aa7930290",
@@ -27,6 +32,13 @@
       "passwordHash": "d1aeaa89557e14539523e8e5bbece9f5afa1952afcfc9f49b1d114d03ddb4994caf921e35013745dc8cdaf22873b0f8bafa36524e90a325bff3850ffc969b352",
       "salt": "92c5ed0dd6565cdfc11547489c61f184",
       "createdAt": "2026-04-27T18:21:20.670Z"
+    },
+    {
+      "id": "1ffeafdbe1f5cac9",
+      "username": "aram",
+      "passwordHash": "588990d39d0d7017f94327ca567645fa29c8d6f620dadf57dd74ed4e59cf842a7b1f49f10f94d7d3dd670f503b462bbe4750892f56e443425193c0060a9f4622",
+      "salt": "bc8da799901014be7692b8c0da8a5b61",
+      "createdAt": "2026-05-01T15:30:50.566Z"
     }
   ]
 }

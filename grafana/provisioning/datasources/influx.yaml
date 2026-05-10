@@ -1,0 +1,18 @@
+# InfluxDB 2.x with Flux (same org/bucket/token as docker-compose Influx init).
+# Token is passed via container env INFLUX_TOKEN (see docker-compose.yml).
+apiVersion: 1
+datasources:
+  - name: Greenhouse InfluxDB
+    uid: influx-greenhouse
+    type: influxdb
+    access: proxy
+    url: http://influxdb:8086
+    isDefault: true
+    editable: true
+    jsonData:
+      version: Flux
+      organization: greenctrl
+      defaultBucket: greenhouse
+      tlsSkipVerify: false
+    secureJsonData:
+      token: ${INFLUX_TOKEN}

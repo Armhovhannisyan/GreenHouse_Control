@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GreenCtrl — Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/auth.css" />
+</head>
+<body>
+  <main class="auth-wrap">
+    <section class="auth-card">
+      <h1>GC Operator Login</h1>
+      <p class="auth-sub">Sign in to access greenhouse dashboard.</p>
+      <form id="loginForm" class="auth-form">
+        <label>
+          Username
+          <input type="text" id="username" autocomplete="username" required />
+        </label>
+        <label>
+          Password
+          <input type="password" id="password" autocomplete="current-password" required />
+        </label>
+        <button type="submit">Login</button>
+      </form>
+      <p class="auth-msg" id="authMsg"></p>
+      <p class="auth-link">No account? <a href="register.html">Register</a></p>
+    </section>
+  </main>
+  <script src="js/config.js"></script>
+  <script src="js/pages/auth-login.js"></script>
+</body>
+</html>

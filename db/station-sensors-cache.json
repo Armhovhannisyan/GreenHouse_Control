@@ -1,0 +1,9 @@
+{
+  "ok": false,
+  "updatedAt": null,
+  "error": null,
+  "climate": null,
+  "irrigation": null,
+  "waterRoom": null,
+  "energyRoom": null
+}

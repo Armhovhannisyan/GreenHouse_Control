@@ -35,7 +35,17 @@ const CONFIG = {
   weatherComFormat: 'json',
   weatherComUnits: 's', // s = metric SI (C, m/s), e = imperial
   weatherComApiKey: '4a09500e731f432b89500e731f532b68',
+  /** Local Node backend (`cd backend && npm start`). Use deployment copy of this file for production URL. */
   backendBaseUrl: 'http://localhost:3001',
+
+  /**
+   * Grafana embed (Precision Growing page). Requires Docker Grafana with
+   * `GF_SECURITY_ALLOW_EMBEDDING` + anonymous Viewer (see docker-compose).
+   * Leave empty to hide the iframe section.
+   */
+  grafanaEmbedBaseUrl: 'http://localhost:3333',
+  /** Dashboard UID from Grafana (matches provisioned JSON `uid`). */
+  grafanaDashboardUid: 'greenhouse-overview',
 
   /* ── SONOFF / eWeLink indoor probe (optional) ───────────────── */
   // When set, this deviceid is used for indoor temp & RH on the climate UI.
@@ -43,6 +53,18 @@ const CONFIG = {
   sonoffClimateDeviceId: '',
   // Set false to skip calling /api/sonoff/devices (PLC / sim only).
   useSonoffIndoorClimate: true,
+
+  /** Ventilation step controller: when true, moves vent toward calculated target (Vent mode automatic in UI). Uses auto-detected W1_W2_L_MV1 if device IDs are empty. */
+  ventilationPidEnabled: true,
+  /** When true, the backend runs the step controller every 30s independently of the page; the frontend only displays it. Set false to fall back to legacy in-browser logic. */
+  ventilationServerPidEnabled: true,
+  /** eWeLink device IDs for the two window motor directions (can be the same multi-channel device). */
+  sonoffVentOpenDeviceId: '',
+  sonoffVentOpenChannel: 2,
+  sonoffVentCloseDeviceId: '',
+  sonoffVentCloseChannel: 1,
+  /** Open/close vent relays when calculated vs actual position gap exceeds this (%). */
+  ventilationPidPositionDeadbandPct: 2,
   // Browser CORS may block direct calls to weather.com from static pages.
   // If that happens, app falls back to Open-Meteo to keep UI populated.
   openMeteoBase: 'https://api.open-meteo.com/v1/forecast',

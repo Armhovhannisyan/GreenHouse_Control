@@ -1,0 +1,38 @@
+{
+  "config": {
+    "stepThresholdC": 1,
+    "stepSizePct": 10,
+    "stepIntervalMs": 60000,
+    "hardCloseDeltaC": 2,
+    "hardOpenDeltaC": 0,
+    "positionDeadbandPct": 2,
+    "minMsBetweenVentMoves": 800,
+    "tickIntervalMs": 30000,
+    "zeroCalIntervalMs": 600000,
+    "zeroCalPulseMs": 10000
+  },
+  "state": {
+    "lastStepAtMs": 1778433373151,
+    "lastActMs": 1778439224971,
+    "lastZeroCalibrationAtMs": 1778439224971,
+    "integral": 20,
+    "lastErr": 5.899999999999999,
+    "lastComputeMs": 1778440065181,
+    "lastTargetPct": 0
+  },
+  "mode": "manual",
+  "manualHoldUntilMs": 1778439683226,
+  "manualTargetPct": 16,
+  "latest": {
+    "computedAt": 1778440065181,
+    "calculatedCoolingTempC": 18,
+    "measuredCoolingTempC": 14.9,
+    "calculatedVentPositionPct": 16,
+    "actualVentPositionPct": 16,
+    "maxVentPct": 30,
+    "periodHuman": "P2",
+    "stepReason": "manual-mode",
+    "stepError": -3.1,
+    "coolingRequiredPct": 16
+  }
+}

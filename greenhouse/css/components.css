@@ -282,6 +282,199 @@
 .pg-lg-dot--weight { background: #2e9e5b; }
 .pg-lg-dot--slab { background: #d96f17; }
 
+/* ── Precision Growing — daily drainage (Influx) ── */
+.pg-drainage-section {
+  margin: 10px 28px 18px;
+}
+.pg-drainage-error {
+  margin: 0 0 10px;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: #9a3412;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+}
+.pg-drainage-panels {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  align-items: stretch;
+}
+@media (max-width: 900px) {
+  .pg-drainage-panels {
+    grid-template-columns: 1fr;
+  }
+}
+.pg-drain-panel {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--card-shadow);
+  padding: 14px 14px 12px;
+  min-width: 0;
+}
+.pg-drain-panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.pg-drain-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.25;
+}
+.pg-drain-sub {
+  font-size: 12px;
+  color: #5c7280;
+  margin-top: 2px;
+}
+.pg-drain-day-badge {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #0f766e;
+  background: #ccfbf1;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+.pg-drain-date {
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 10px;
+}
+.vent-manual-details {
+  margin-top: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #f9fbfc;
+  padding: 8px 10px;
+}
+.vent-manual-summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+.vent-manual-form {
+  display: grid;
+  gap: 8px;
+}
+.vent-manual-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.vent-manual-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.vent-manual-value {
+  font-size: 12px;
+  color: var(--text-primary);
+  font-family: var(--mono);
+}
+.vent-manual-msg {
+  font-size: 12px;
+  color: #475467;
+  min-height: 16px;
+}
+.pg-drain-total {
+  font-size: 32px;
+  font-weight: 600;
+  font-family: "DM Mono", ui-monospace, monospace;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin-bottom: 14px;
+}
+.pg-drain-unit {
+  font-size: 14px;
+  font-weight: 500;
+  color: #64748b;
+  margin-left: 4px;
+}
+.pg-drain-chart {
+  position: relative;
+  height: 140px;
+  padding: 0 2px 22px;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 10px;
+}
+.pg-drain-chart-grid {
+  display: grid;
+  grid-template-columns: repeat(24, minmax(0, 1fr));
+  gap: 2px;
+  height: 118px;
+  align-items: end;
+}
+.pg-drain-bar-cell {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  min-width: 0;
+  height: 100%;
+}
+.pg-drain-bar {
+  width: 100%;
+  max-width: 14px;
+  margin: 0 auto;
+  border-radius: 3px 3px 0 0;
+  background: linear-gradient(180deg, #2dd4bf 0%, #0d9488 100%);
+  transition: height 0.25s ease;
+  min-height: 0;
+}
+.pg-drain-xaxis {
+  display: grid;
+  grid-template-columns: repeat(24, minmax(0, 1fr));
+  gap: 2px;
+  margin-top: 6px;
+}
+.pg-drain-xlabel {
+  text-align: center;
+  font-size: 8px;
+  font-family: "DM Mono", ui-monospace, monospace;
+  color: #94a3b8;
+  min-width: 0;
+}
+.pg-drain-xlabel--tick {
+  font-weight: 600;
+  color: #475569;
+}
+
+/* ── Precision Growing — Grafana iframe ── */
+.precision-growing-main .pg-grafana-embed .pg-grafana-embed-hint {
+  margin: 0 0 12px;
+  font-size: 12px;
+  color: #5c7280;
+  line-height: 1.45;
+}
+.precision-growing-main .pg-grafana-embed-frame-wrap {
+  width: 100%;
+  min-height: 520px;
+  height: min(78vh, 900px);
+  border: 1px solid #e6edf2;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+}
+.precision-growing-main .pg-grafana-embed-frame-wrap iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 520px;
+  border: 0;
+}
+.precision-growing-main .pg-grafana-embed-actions {
+  margin-top: 12px;
+}
+
 /* ── Precision Growing page ── */
 .precision-growing-main .precision-growing-card {
   margin: 10px 28px 26px;
@@ -344,4 +537,92 @@
   .precision-growing-layout {
     grid-template-columns: 1fr;
   }
+}
+
+.precision-growing-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  gap: 10px 14px;
+  margin-top: 14px;
+  padding: 12px 12px 10px;
+  border: 1px solid #e6edf2;
+  border-radius: 8px;
+  background: #f9fbfc;
+}
+.pg-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.pg-metric-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #4f636f;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.pg-metric-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: #294858;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pg-mqtt-raw-details {
+  margin-top: 16px;
+  border: 1px solid #e6edf2;
+  border-radius: 8px;
+  background: #fff;
+  padding: 0 12px 12px;
+}
+.pg-mqtt-raw-summary {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: #294858;
+  padding: 12px 0 8px;
+  list-style-position: outside;
+}
+.pg-mqtt-raw-hint {
+  margin: 0 0 10px;
+  font-size: 12px;
+  color: #6b8294;
+  line-height: 1.45;
+}
+.pg-mqtt-raw {
+  max-height: 420px;
+  overflow: auto;
+  border-radius: 6px;
+  border: 1px solid #edf2f5;
+  background: #f9fbfc;
+  padding: 10px;
+}
+.pg-mqtt-raw-row {
+  margin-bottom: 12px;
+}
+.pg-mqtt-raw-row:last-child {
+  margin-bottom: 0;
+}
+.pg-mqtt-raw-meta {
+  font-family: "DM Mono", ui-monospace, monospace;
+  font-size: 11px;
+  color: #4f636f;
+  margin-bottom: 4px;
+  word-break: break-all;
+}
+.pg-mqtt-raw-payload {
+  margin: 0;
+  padding: 8px 10px;
+  font-family: "DM Mono", ui-monospace, monospace;
+  font-size: 11px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: #fff;
+  border: 1px solid #e6edf2;
+  border-radius: 4px;
+  color: #1a2b36;
 }

@@ -30,6 +30,20 @@ const WeatherReportsPage = (() => {
     rainSensorSensitivity: 'NORMAL',
   };
   let weatherConfig = { ...DEFAULT_CONFIG };
+  const EMBED_MODE = new URLSearchParams(window.location.search).get('embed') === 'chart';
+
+  function postEmbedHeight() {
+    if (!EMBED_MODE) return;
+    const card = document.querySelector('.weather-chart-card');
+    if (!card) return;
+    const h = Math.ceil(card.getBoundingClientRect().height);
+    if (!Number.isFinite(h) || h <= 0) return;
+    try {
+      window.parent.postMessage({ type: 'weather-chart-height', height: h + 12 }, '*');
+    } catch (_err) {
+      /* ignore */
+    }
+  }
 
   function apiUrl(path) {
     const base = (CONFIG.backendBaseUrl || '').replace(/\/$/, '');
@@ -381,6 +395,7 @@ const WeatherReportsPage = (() => {
     if (filteredRows.length) {
       updateQuickAnalysisValues(filteredRows.length - 1);
     }
+    postEmbedHeight();
   }
 
   function calcAbsoluteHumidity(tempC, rhPct) {
@@ -596,6 +611,39 @@ const WeatherReportsPage = (() => {
     }
     Header.render();
     Sidebar.render();
+    if (EMBED_MODE) {
+      const header = document.getElementById('app-header');
+      if (header) header.style.display = 'none';
+      const sidebar = document.getElementById('app-sidebar');
+      if (sidebar) sidebar.style.display = 'none';
+      const pageHeader = document.querySelector('#app-main > .page-header');
+      if (pageHeader) pageHeader.style.display = 'none';
+      const statusBar = document.getElementById('weatherStatusBar');
+      if (statusBar) statusBar.style.display = 'none';
+      const weatherRoot = document.getElementById('weatherReportsRoot');
+      if (weatherRoot) weatherRoot.style.display = 'none';
+      const cfgBody = document.getElementById('reportBody-configuration');
+      if (cfgBody) cfgBody.style.display = 'none';
+      const cfgTitle = document.querySelector('[data-report-toggle="configuration"]');
+      if (cfgTitle) {
+        const cfgBlock = cfgTitle.closest('.weather-report-block');
+        if (cfgBlock) cfgBlock.style.display = 'none';
+      }
+      const statusBody = document.getElementById('reportBody-status');
+      if (statusBody) statusBody.style.display = 'none';
+      const statusTitle = document.querySelector('[data-report-toggle="status"]');
+      if (statusTitle) {
+        const statusBlock = statusTitle.closest('.weather-report-block');
+        if (statusBlock) statusBlock.style.display = 'none';
+      }
+      const wrap = document.querySelector('.weather-page-wrap');
+      if (wrap) wrap.style.padding = '8px';
+      const layout = document.querySelector('.layout');
+      if (layout) layout.style.display = 'block';
+      if (document && document.body) document.body.style.background = '#fff';
+      window.addEventListener('resize', postEmbedHeight);
+      window.setTimeout(postEmbedHeight, 50);
+    }
     renderStatus('Loading reports...');
     loadWeatherConfig();
     renderConfigSection();

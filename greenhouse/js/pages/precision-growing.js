@@ -1,6 +1,7 @@
 const PrecisionGrowingPage = (() => {
   const TOKEN_KEY = 'authToken.v1';
   const HISTORY_MAX = 24 * 12;
+  const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const series = [];
   let timer = null;
   const visibleSeries = {
@@ -156,6 +157,219 @@ const PrecisionGrowingPage = (() => {
     if (visibleSeries.slabMoisture) drawLine(ctx, area, series, 'slabMoisture', 30, 100, '#d96f17');
   }
 
+  function setMetric(id, text) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = text == null || text === '' ? '—' : String(text);
+  }
+
+  function updateLiveMetrics(sensors) {
+    const pg = sensors && sensors.precisionGrowing ? sensors.precisionGrowing : null;
+    const room = sensors && sensors.aranetRoom ? sensors.aranetRoom : null;
+    const mq = sensors && sensors.mqtt ? sensors.mqtt : null;
+    const climate = sensors && sensors.climate ? sensors.climate : {};
+
+    const leaf = pg && pg.leafTemp != null ? Number(pg.leafTemp) : NaN;
+    setMetric('pgMetLeaf', Number.isFinite(leaf) ? `${leaf.toFixed(1)} °C` : '—');
+
+    let vpdText = '—';
+    const vpd = pg && pg.vpd != null ? Number(pg.vpd) : NaN;
+    if (Number.isFinite(vpd)) {
+      vpdText = `${vpd.toFixed(2)} kPa`;
+    } else if (Number.isFinite(leaf)) {
+      const rh = room && room.humidity != null ? Number(room.humidity) : Number(climate.humidity);
+      if (Number.isFinite(rh) && rh >= 0 && rh <= 100) {
+        const svp = 0.6108 * Math.exp((17.27 * leaf) / (leaf + 237.3));
+        vpdText = `${(svp * (1 - rh / 100)).toFixed(2)} kPa`;
+      }
+    }
+    setMetric('pgMetVpd', vpdText);
+
+    const par = pg && pg.par != null ? Number(pg.par) : NaN;
+    setMetric('pgMetPar', Number.isFinite(par) ? String(Math.round(par)) : '—');
+
+    const ec = pg && pg.slabEc != null ? Number(pg.slabEc) : NaN;
+    setMetric('pgMetSlabEc', Number.isFinite(ec) ? ec.toFixed(2) : '—');
+
+    const pScale = pg && pg.plantScale != null ? Number(pg.plantScale) : NaN;
+    setMetric('pgMetPlantScale', Number.isFinite(pScale) ? pScale.toFixed(1) : '—');
+
+    const sScale = pg && pg.slabScale != null ? Number(pg.slabScale) : NaN;
+    setMetric('pgMetSlabScale', Number.isFinite(sScale) ? sScale.toFixed(1) : '—');
+
+    const air = room && room.temp != null ? Number(room.temp) : NaN;
+    setMetric('pgMetAir', Number.isFinite(air) ? `${air.toFixed(1)} °C` : '—');
+
+    const rhR = room && room.humidity != null ? Number(room.humidity) : NaN;
+    setMetric('pgMetRh', Number.isFinite(rhR) ? `${Math.round(rhR)} %` : '—');
+
+    let mqttText = '—';
+    if (mq && typeof mq.connected === 'boolean') {
+      if (mq.connected && mq.updatedAt) {
+        const t = new Date(mq.updatedAt);
+        mqttText = Number.isFinite(t.getTime()) ? `Live · ${t.toLocaleTimeString()}` : 'Live';
+      } else {
+        mqttText = mq.connected ? 'Live' : 'Offline';
+      }
+    }
+    setMetric('pgMetMqtt', mqttText);
+    updateMqttRaw(sensors);
+  }
+
+  function updateMqttRaw(sensors) {
+    const wrap = document.getElementById('pgMqttRaw');
+    if (!wrap) return;
+    const mq = sensors && sensors.mqtt ? sensors.mqtt : null;
+    const arr = mq && Array.isArray(mq.recentMessages) ? mq.recentMessages : [];
+    wrap.textContent = '';
+    if (!arr.length) {
+      wrap.textContent =
+        'No MQTT messages captured yet. When Aranet publishes under your subscribe topic, each message appears here.';
+      return;
+    }
+    const frag = document.createDocumentFragment();
+    for (let i = arr.length - 1; i >= 0; i -= 1) {
+      const m = arr[i];
+      const row = document.createElement('div');
+      row.className = 'pg-mqtt-raw-row';
+      const meta = document.createElement('div');
+      meta.className = 'pg-mqtt-raw-meta';
+      meta.textContent = `${m.at || ''} · ${m.topic || ''}`;
+      const pre = document.createElement('pre');
+      pre.className = 'pg-mqtt-raw-payload';
+      pre.textContent = m.payload != null ? String(m.payload) : '';
+      row.appendChild(meta);
+      row.appendChild(pre);
+      frag.appendChild(row);
+    }
+    wrap.appendChild(frag);
+  }
+
+  function localDayRangeForDate(d) {
+    const y = d.getFullYear();
+    const m = d.getMonth();
+    const day = d.getDate();
+    const start = new Date(y, m, day, 0, 0, 0, 0);
+    const end = new Date(y, m, day + 1, 0, 0, 0, 0);
+    return { start: start.getTime(), end: end.getTime() };
+  }
+
+  function formatDrainageDayStamp(d) {
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${dd}-${MONTHS[d.getMonth()]}-${d.getFullYear()}`;
+  }
+
+  function formatDrainageMl(n) {
+    const x = Number(n);
+    if (!Number.isFinite(x)) return '0.000';
+    return x.toLocaleString(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 3 });
+  }
+
+  function buildDrainagePanelEl(data, which, title, subtitle, dateObj, dayLabel, asOfLine) {
+    const block = data && data[which] ? data[which] : null;
+    const hourly = block && Array.isArray(block.hourlyMl) ? block.hourlyMl : new Array(24).fill(0);
+    const total = block && Number.isFinite(Number(block.totalMl)) ? Number(block.totalMl) : 0;
+    const max = Math.max(1e-9, ...hourly.map((v) => Number(v) || 0));
+
+    const panel = document.createElement('div');
+    panel.className = 'pg-drain-panel';
+
+    const head = document.createElement('div');
+    head.className = 'pg-drain-panel-head';
+    const left = document.createElement('div');
+    const tEl = document.createElement('div');
+    tEl.className = 'pg-drain-title';
+    tEl.textContent = title;
+    left.appendChild(tEl);
+    if (subtitle) {
+      const sEl = document.createElement('div');
+      sEl.className = 'pg-drain-sub';
+      sEl.textContent = subtitle;
+      left.appendChild(sEl);
+    }
+    const badge = document.createElement('span');
+    badge.className = 'pg-drain-day-badge';
+    badge.textContent = dayLabel;
+    head.appendChild(left);
+    head.appendChild(badge);
+    panel.appendChild(head);
+
+    const dateLine = document.createElement('div');
+    dateLine.className = 'pg-drain-date';
+    dateLine.textContent = `${formatDrainageDayStamp(dateObj)}${asOfLine || ''}`;
+    panel.appendChild(dateLine);
+
+    const totalEl = document.createElement('div');
+    totalEl.className = 'pg-drain-total';
+    totalEl.appendChild(document.createTextNode(`${formatDrainageMl(total)} `));
+    const unit = document.createElement('span');
+    unit.className = 'pg-drain-unit';
+    unit.textContent = 'ml';
+    totalEl.appendChild(unit);
+    panel.appendChild(totalEl);
+
+    const chart = document.createElement('div');
+    chart.className = 'pg-drain-chart';
+    const grid = document.createElement('div');
+    grid.className = 'pg-drain-chart-grid';
+    for (let h = 0; h < 24; h += 1) {
+      const cell = document.createElement('div');
+      cell.className = 'pg-drain-bar-cell';
+      const bar = document.createElement('div');
+      bar.className = 'pg-drain-bar';
+      const v = Number(hourly[h]) || 0;
+      const pct = Math.round((v / max) * 100);
+      bar.style.height = `${pct}%`;
+      bar.title = `${String(h).padStart(2, '0')}:00 — ${v.toFixed(1)} ml`;
+      cell.appendChild(bar);
+      grid.appendChild(cell);
+    }
+    chart.appendChild(grid);
+
+    const xaxis = document.createElement('div');
+    xaxis.className = 'pg-drain-xaxis';
+    for (let h = 0; h < 24; h += 1) {
+      const lab = document.createElement('span');
+      lab.className = 'pg-drain-xlabel' + (h % 4 === 0 ? ' pg-drain-xlabel--tick' : '');
+      lab.textContent = h % 4 === 0 ? String(h).padStart(2, '0') : '·';
+      xaxis.appendChild(lab);
+    }
+    chart.appendChild(xaxis);
+    panel.appendChild(chart);
+
+    return panel;
+  }
+
+  async function refreshDrainage() {
+    const wrap = document.getElementById('pgDrainagePanels');
+    const errEl = document.getElementById('pgDrainageError');
+    if (!wrap || !errEl) return;
+    const now = new Date();
+    const yDate = new Date(now);
+    yDate.setDate(yDate.getDate() - 1);
+    const ry = localDayRangeForDate(yDate);
+    const rt = localDayRangeForDate(now);
+    try {
+      const data = await SensorAPI.fetchDrainageDaily(ry.start, ry.end, rt.start, rt.end);
+      if (!data || !data.ok) {
+        errEl.hidden = false;
+        errEl.textContent = (data && data.message) || 'Drainage history is unavailable.';
+        wrap.textContent = '';
+        return;
+      }
+      errEl.hidden = true;
+      wrap.textContent = '';
+      const title = data.title || 'Drainage sensor';
+      const sub = data.subtitle || '';
+      const asOfToday = ` (as of ${Helpers.timeStr(now)})`;
+      wrap.appendChild(buildDrainagePanelEl(data, 'yesterday', title, sub, yDate, 'Yesterday', ''));
+      wrap.appendChild(buildDrainagePanelEl(data, 'today', title, sub, now, 'Today', asOfToday));
+    } catch (e) {
+      errEl.hidden = false;
+      errEl.textContent = e && e.message ? String(e.message) : 'Could not load drainage.';
+      wrap.textContent = '';
+    }
+  }
+
   function setStatusBar(state) {
     const bar = document.getElementById('pgStatusBar');
     if (!bar) return;
@@ -179,11 +393,15 @@ const PrecisionGrowingPage = (() => {
       const prev = series.length ? series[series.length - 1] : null;
       pushPoint(nextPoint(prev, sensors && sensors.climate ? sensors.climate : {}, sensors && sensors.precisionGrowing ? sensors.precisionGrowing : null));
       drawChart();
+      updateLiveMetrics(sensors || {});
+      await refreshDrainage();
       setStatusBar('online');
       const last = document.getElementById('pgLastUpdated');
       if (last) last.textContent = Helpers.timeStr();
     } catch (_err) {
       setStatusBar('offline');
+      updateLiveMetrics({});
+      await refreshDrainage();
     }
   }
 
@@ -199,6 +417,24 @@ const PrecisionGrowingPage = (() => {
     `;
     const btn = document.getElementById('pgRefreshBtn');
     if (btn) btn.addEventListener('click', () => refresh());
+  }
+
+  function setupGrafanaEmbed() {
+    const base = CONFIG.grafanaEmbedBaseUrl != null ? String(CONFIG.grafanaEmbedBaseUrl).trim() : '';
+    const uid = CONFIG.grafanaDashboardUid != null ? String(CONFIG.grafanaDashboardUid).trim() : 'greenhouse-overview';
+    const section = document.getElementById('data-driven-growing-anchor');
+    const frame = document.getElementById('pgGrafanaEmbedFrame');
+    const ext = document.getElementById('pgGrafanaOpenExternal');
+    if (!section || !frame || !ext) return;
+    if (!base) return;
+    const root = base.replace(/\/$/, '');
+    const from = encodeURIComponent('now-7d');
+    const to = encodeURIComponent('now');
+    const src = `${root}/d/${uid}/embedded?orgId=1&kiosk=tv&theme=light&from=${from}&to=${to}`;
+    const tab = `${root}/d/${uid}/embedded?orgId=1&kiosk&theme=light&from=${from}&to=${to}`;
+    frame.src = src;
+    ext.href = tab;
+    section.removeAttribute('hidden');
   }
 
   function bindFilterPanel() {
@@ -237,6 +473,7 @@ const PrecisionGrowingPage = (() => {
     Sidebar.render();
     renderActions();
     bindFilterPanel();
+    setupGrafanaEmbed();
     refresh();
     timer = window.setInterval(refresh, CONFIG.pollIntervalMs || 30000);
     window.addEventListener('resize', drawChart);

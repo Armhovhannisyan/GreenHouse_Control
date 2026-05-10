@@ -1,0 +1,53 @@
+/* ── css/base.css — design tokens & reset ── */
+
+:root {
+  --bg:            #eef2f5;
+  --surface:       #ffffff;
+  --surface-2:     #f4f7fa;
+  --header-bg:     #0d2b3e;
+  --header-accent: #1a4a60;
+  --teal:          #0a7c6e;
+  --teal-light:    #13a396;
+  --green:         #2e9e5b;
+  --green-arc:     #1db954;
+  --blue-arc:      #4da6d6;
+  --text-primary:  #1a2e3b;
+  --text-secondary:#6b8090;
+  --text-muted:    #9ab0be;
+  --border:        #dde5ec;
+  --alert-warn:    #e8a020;
+  --alert-danger:  #d94040;
+  --card-shadow:   0 2px 12px rgba(13,43,62,.07);
+  --font:          'DM Sans', sans-serif;
+  --mono:          'DM Mono', monospace;
+  --radius-card:   12px;
+  --radius-btn:    7px;
+  --radius-badge:  99px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+a { text-decoration: none; }
+
+button {
+  font-family: var(--font);
+  cursor: pointer;
+}
+
+/* ── Utility classes ── */
+.text-ok      { color: var(--green); }
+.text-warn    { color: var(--alert-warn); }
+.text-danger  { color: var(--alert-danger); }
+.text-off     { color: var(--text-muted); }
+.text-muted   { color: var(--text-muted); }
+.font-mono    { font-family: var(--mono); }
+.font-semibold{ font-weight: 600; }

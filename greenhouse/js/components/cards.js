@@ -6,9 +6,14 @@
  */
 
 const Cards = (() => {
-  function updatePrecisionGrowingCard(climate, precisionGrowing) {
+  function updatePrecisionGrowingCard(climate, sensors) {
+    const precisionGrowing = sensors && sensors.precisionGrowing ? sensors.precisionGrowing : null;
+    const aranetRoom = sensors && sensors.aranetRoom ? sensors.aranetRoom : null;
+    const mqtt = sensors && sensors.mqtt ? sensors.mqtt : null;
+
     const leafTemp = Number(precisionGrowing && precisionGrowing.leafTemp != null ? precisionGrowing.leafTemp : climate.temp);
-    const rh = Number(climate.humidity);
+    const rhAranet = aranetRoom && aranetRoom.humidity != null ? Number(aranetRoom.humidity) : NaN;
+    const rh = Number.isFinite(rhAranet) ? rhAranet : Number(climate.humidity);
     const leafTempOk = Number.isFinite(leafTemp);
     const vpdFromPg = Number(precisionGrowing && precisionGrowing.vpd);
     const vpdFromPgOk = Number.isFinite(vpdFromPg);
@@ -27,6 +32,38 @@ const Cards = (() => {
       Helpers.setStat('piVpd', '— kPa', 'off');
     }
 
+    const par = precisionGrowing && precisionGrowing.par != null ? Number(precisionGrowing.par) : NaN;
+    Helpers.setStat('piPar', Number.isFinite(par) ? String(Math.round(par)) : '—', Number.isFinite(par) ? 'ok' : 'off');
+
+    const slabEc = precisionGrowing && precisionGrowing.slabEc != null ? Number(precisionGrowing.slabEc) : NaN;
+    Helpers.setStat('piSlabEc', Number.isFinite(slabEc) ? slabEc.toFixed(2) : '—', Number.isFinite(slabEc) ? 'ok' : 'off');
+
+    let mqttLabel = '—';
+    let mqttCls = 'off';
+    if (mqtt && typeof mqtt.connected === 'boolean') {
+      mqttCls = mqtt.connected ? 'ok' : 'off';
+      if (mqtt.connected && mqtt.updatedAt) {
+        const t = new Date(mqtt.updatedAt);
+        mqttLabel = Number.isFinite(t.getTime()) ? `Live · ${t.toLocaleTimeString()}` : 'Live';
+      } else {
+        mqttLabel = mqtt.connected ? 'Live' : 'Offline';
+      }
+    }
+    Helpers.setStat('piMqtt', mqttLabel, mqttCls);
+
+    Gauge.update('ddGauge', leafTempOk ? leafTemp : 0, cMin, cMax, leafTempOk ? leafTemp.toFixed(1) : '—');
+    Helpers.setStat('ddLeafTemp', leafTempOk ? `${leafTemp.toFixed(1)} °C` : '— °C');
+    if (vpdFromPgOk) {
+      Helpers.setStat('ddVpd', `${vpdFromPg.toFixed(2)} kPa`, 'ok');
+    } else if (leafTempOk && rhOk && rh >= 0 && rh <= 100) {
+      const svp = 0.6108 * Math.exp((17.27 * leafTemp) / (leafTemp + 237.3));
+      const vpd = svp * (1 - rh / 100);
+      Helpers.setStat('ddVpd', `${vpd.toFixed(2)} kPa`, 'ok');
+    } else {
+      Helpers.setStat('ddVpd', '— kPa', 'off');
+    }
+    Helpers.setStat('ddMqtt', mqttLabel, mqttCls);
+    Helpers.setStat('ddPar', Number.isFinite(par) ? String(Math.round(par)) : '—', Number.isFinite(par) ? 'ok' : 'off');
   }
 
   /* ── Initial render ── */
@@ -147,6 +184,46 @@ const Cards = (() => {
             <div class="stat-label">VPD</div>
             <div class="stat-value font-mono" id="piVpd">— kPa</div>
           </div>
+          <div class="stat">
+            <div class="stat-label">PAR</div>
+            <div class="stat-value font-mono" id="piPar">—</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Slab EC</div>
+            <div class="stat-value font-mono" id="piSlabEc">—</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Aranet MQTT</div>
+            <div class="stat-value font-mono" id="piMqtt">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DATA DRIVEN GROWING -->
+      <div class="card card-clickable" id="dataDrivenGrowingCard" title="Open Precision Growing — Grafana & Influx" role="button" tabindex="0">
+        <div class="card-title"><span class="card-icon">📈</span> Data Driven Growing</div>
+        ${Gauge.html({ id: 'ddGauge', min: cMin, max: cMax, unit: '°C', color: 'green' })}
+        <div class="card-stats">
+          <div class="stat">
+            <div class="stat-label">Leaf temp (live)</div>
+            <div class="stat-value font-mono" id="ddLeafTemp">— °C</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">VPD</div>
+            <div class="stat-value font-mono" id="ddVpd">— kPa</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">MQTT stream</div>
+            <div class="stat-value font-mono" id="ddMqtt">—</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Charts &amp; history</div>
+            <div class="stat-value font-mono" id="ddHub">Grafana · Influx</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">PAR</div>
+            <div class="stat-value font-mono" id="ddPar">—</div>
+          </div>
         </div>
       </div>
     `;
@@ -202,6 +279,20 @@ const Cards = (() => {
         }
       });
     }
+
+    const ddCard = document.getElementById('dataDrivenGrowingCard');
+    if (ddCard) {
+      const goDataDriven = () => {
+        window.location.href = 'precision-growing.html#data-driven-growing-anchor';
+      };
+      ddCard.addEventListener('click', goDataDriven);
+      ddCard.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          goDataDriven();
+        }
+      });
+    }
   }
 
   /* ── Update values (no DOM rebuild) ── */
@@ -249,7 +340,7 @@ const Cards = (() => {
     Helpers.setStat('moStatSource', 'Relays', 'ok');
     Helpers.setStat('moStatHint', 'Open page', 'off');
 
-    updatePrecisionGrowingCard(climate, sensors && sensors.precisionGrowing ? sensors.precisionGrowing : null);
+    updatePrecisionGrowingCard(climate, sensors || {});
 
   }
 

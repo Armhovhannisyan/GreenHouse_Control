@@ -1,0 +1,115 @@
+{
+  "ok": true,
+  "updatedAt": "2026-05-10T19:07:46.808Z",
+  "error": null,
+  "region": "as",
+  "count": 6,
+  "devices": [
+    {
+      "deviceid": "10021068ac",
+      "name": "W1_W2_L_MV1",
+      "online": true,
+      "brand": "SONOFF",
+      "productModel": "4CHPROR3",
+      "uiid": 4,
+      "temperature": null,
+      "humidity": null,
+      "switch": "off",
+      "switches": [
+        {
+          "outlet": 0,
+          "switch": "off"
+        },
+        {
+          "outlet": 1,
+          "switch": "off"
+        },
+        {
+          "outlet": 2,
+          "switch": "off"
+        },
+        {
+          "outlet": 3,
+          "switch": "off"
+        }
+      ]
+    },
+    {
+      "deviceid": "1002106746",
+      "name": "MV2_CF_H_P",
+      "online": true,
+      "brand": "SONOFF",
+      "productModel": "4CHPROR3",
+      "uiid": 4,
+      "temperature": null,
+      "humidity": null,
+      "switch": null,
+      "switches": [
+        {
+          "outlet": 0,
+          "switch": "off"
+        },
+        {
+          "outlet": 1,
+          "switch": "off"
+        },
+        {
+          "outlet": 2,
+          "switch": "off"
+        },
+        {
+          "outlet": 3,
+          "switch": "off"
+        }
+      ]
+    },
+    {
+      "deviceid": "10021f9c21",
+      "name": "Temperature_Entrance",
+      "online": true,
+      "brand": "SONOFF",
+      "productModel": "THR316D",
+      "uiid": 181,
+      "temperature": 14.9,
+      "humidity": 99.9,
+      "switch": "on",
+      "switches": null
+    },
+    {
+      "deviceid": "10020e1269",
+      "name": "Temperature_Humidity2",
+      "online": false,
+      "brand": "SONOFF",
+      "productModel": "THR316D",
+      "uiid": 181,
+      "temperature": 118.6,
+      "humidity": 96.3,
+      "switch": "off",
+      "switches": null
+    },
+    {
+      "deviceid": "1002015c6d",
+      "name": "Drsi Luys Mec",
+      "online": true,
+      "brand": "SONOFF",
+      "productModel": "BASICR2",
+      "uiid": 1,
+      "temperature": null,
+      "humidity": null,
+      "switch": "on",
+      "switches": null
+    },
+    {
+      "deviceid": "1002113301",
+      "name": "Drsi Lus",
+      "online": false,
+      "brand": "SONOFF",
+      "productModel": "BASICR2",
+      "uiid": 1,
+      "temperature": null,
+      "humidity": null,
+      "switch": "off",
+      "switches": null
+    }
+  ]
+}

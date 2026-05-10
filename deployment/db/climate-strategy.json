@@ -1,0 +1,76 @@
+{
+  "periods": [
+    {
+      "use": true,
+      "startTimeAnchor": "sunrise",
+      "startTime": "8:00",
+      "rampTime": "2",
+      "details": {
+        "coolingTemp": 21,
+        "heatingTemp": 19,
+        "purgeRh": 82,
+        "purgeHumidityDeficit": 0,
+        "purgeVpd": 0,
+        "rhAbove": 80,
+        "humidityDeficitBelow": 0,
+        "maxWaterMix1": 60,
+        "maxWaterMix2": 0,
+        "minWaterMix1": 0,
+        "minWaterMix2": 0,
+        "offsetWaterMix2": -40,
+        "maxVentLee": 35,
+        "maxVentWind": 25,
+        "minVentLee": 0,
+        "minVentWind": 0
+      }
+    },
+    {
+      "use": true,
+      "startTimeAnchor": "sunset",
+      "startTime": "20:00",
+      "rampTime": "2",
+      "details": {
+        "coolingTemp": 18,
+        "heatingTemp": 17,
+        "purgeRh": 75,
+        "purgeHumidityDeficit": 0,
+        "purgeVpd": 0,
+        "rhAbove": 70,
+        "humidityDeficitBelow": 0,
+        "maxWaterMix1": 60,
+        "maxWaterMix2": 0,
+        "minWaterMix1": 0,
+        "minWaterMix2": 0,
+        "offsetWaterMix2": -40,
+        "maxVentLee": 30,
+        "maxVentWind": 30,
+        "minVentLee": 0,
+        "minVentWind": 0
+      }
+    },
+    {
+      "use": false,
+      "startTimeAnchor": "fixed",
+      "startTime": "20:00",
+      "rampTime": "1",
+      "details": {
+        "coolingTemp": 20,
+        "heatingTemp": 19,
+        "purgeRh": 75,
+        "purgeHumidityDeficit": 0,
+        "purgeVpd": 0,
+        "rhAbove": 70,
+        "humidityDeficitBelow": 0,
+        "maxWaterMix1": 60,
+        "maxWaterMix2": 0,
+        "minWaterMix1": 0,
+        "minWaterMix2": 0,
+        "offsetWaterMix2": -40,
+        "maxVentLee": 30,
+        "maxVentWind": 30,
+        "minVentLee": 0,
+        "minVentWind": 0
+      }
+    }
+  ]
+}

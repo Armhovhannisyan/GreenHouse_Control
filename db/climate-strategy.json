@@ -3,11 +3,11 @@
     {
       "use": true,
       "startTimeAnchor": "sunrise",
-      "startTime": "8:00",
+      "startTime": "6:00",
       "rampTime": "2",
       "details": {
-        "coolingTemp": 21,
-        "heatingTemp": 19,
+        "coolingTemp": 22,
+        "heatingTemp": 18,
         "purgeRh": 82,
         "purgeHumidityDeficit": 0,
         "purgeVpd": 0,
@@ -18,8 +18,8 @@
         "minWaterMix1": 0,
         "minWaterMix2": 0,
         "offsetWaterMix2": -40,
-        "maxVentLee": 35,
-        "maxVentWind": 25,
+        "maxVentLee": 95,
+        "maxVentWind": 95,
         "minVentLee": 0,
         "minVentWind": 0
       }

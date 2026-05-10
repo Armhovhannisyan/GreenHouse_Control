@@ -5,6 +5,7 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const { resolveAppRoot } = require('./paths');
 let WebAPI = null;
 let webApiLoadError = null;
 
@@ -23,8 +24,9 @@ function ensureWebApiLoaded() {
   }
 }
 
-const OAUTH_FILE = path.resolve(__dirname, '..', 'db', 'ewelink-oauth.json');
-const PENDING_FILE = path.resolve(__dirname, '..', 'db', 'ewelink-oauth-pending.json');
+const APP_ROOT = resolveAppRoot();
+const OAUTH_FILE = path.join(APP_ROOT, 'db', 'ewelink-oauth.json');
+const PENDING_FILE = path.join(APP_ROOT, 'db', 'ewelink-oauth-pending.json');
 
 function readJsonSafe(filePath, fallback) {
   try {
@@ -101,14 +103,30 @@ function createWebClient(cfg, region) {
   });
 }
 
+function pickSonoffSwitchChannelName(s) {
+  if (!s || typeof s !== 'object') return null;
+  const candidates = [s.name, s.outletName, s.channelName, s.alias, s.switchName];
+  for (let i = 0; i < candidates.length; i += 1) {
+    const v = candidates[i];
+    if (typeof v === 'string' && v.trim()) return v.trim();
+  }
+  return null;
+}
+
+function mapSonoffSwitchForClient(s) {
+  if (!s || typeof s !== 'object') return null;
+  const o = { outlet: s.outlet, switch: s.switch };
+  const cn = pickSonoffSwitchChannelName(s);
+  if (cn) o.name = cn;
+  return o;
+}
+
 function mapThingToDevice(item) {
   if (!item || (item.itemType !== 1 && item.itemType !== 2)) return null;
   const d = item.itemData || {};
   const params = d.params || {};
   const switches = Array.isArray(params.switches)
-    ? params.switches.map(function (s) {
-        return { outlet: s.outlet, switch: s.switch };
-      })
+    ? params.switches.map(mapSonoffSwitchForClient)
     : null;
   return {
     deviceid: d.deviceid,
@@ -143,9 +161,7 @@ async function enrichDeviceStatus(client, device) {
     }
     if (out.switch == null && typeof params.switch === 'string') out.switch = params.switch;
     if (!Array.isArray(out.switches) && Array.isArray(params.switches)) {
-      out.switches = params.switches.map(function (s) {
-        return { outlet: s.outlet, switch: s.switch };
-      });
+      out.switches = params.switches.map(mapSonoffSwitchForClient);
     }
     return out;
   } catch (_err) {
@@ -248,32 +264,32 @@ async function debugRawThingAndStatus(cfg, deviceId) {
   return { region: client.region, thing: thing, status: status };
 }
 
-async function controlThingOAuth(cfg, deviceId, state, channel) {
+async function controlThingOAuth(cfg, deviceId, state, channel, options) {
   const { client } = await getOauthClient(cfg);
+  const logEvent = options && typeof options.logEvent === 'function' ? options.logEvent : null;
+  const source = options && options.source ? String(options.source) : 'unknown';
   const ch = channel == null ? 1 : Number(channel);
   if (!Number.isFinite(ch) || ch < 1) {
     throw new Error('Invalid channel');
   }
+  if (logEvent) {
+    logEvent('info', '[sonoff] oauth relay control request', {
+      source: source,
+      deviceId: String(deviceId || ''),
+      state: String(state || ''),
+      channel: ch,
+      percentage: options && options.percentage != null ? Number(options.percentage) : null,
+    });
+  }
 
   let params = {};
-  if (ch === 1) {
-    if (state === 'toggle') {
-      const st = await client.device.getThingStatus({ type: 1, id: deviceId });
-      const cur = st && st.data && st.data.params && st.data.params.switch;
-      const next = cur === 'on' ? 'off' : 'on';
-      params = { switch: next };
-    } else {
-      params = { switch: state };
-    }
-  } else {
-    const st = await client.device.getThingStatus({ type: 1, id: deviceId });
-    const p = (st && st.data && st.data.params) || {};
-    const switches = Array.isArray(p.switches) ? p.switches.map(function (s) {
-      return { outlet: s.outlet, switch: s.switch };
-    }) : [];
-    if (!switches.length) {
-      throw new Error('Device has no multi-channel switches in status');
-    }
+  const st = await client.device.getThingStatus({ type: 1, id: deviceId });
+  const p = (st && st.data && st.data.params) || {};
+  const switches = Array.isArray(p.switches) ? p.switches.map(function (s) {
+    return { outlet: s.outlet, switch: s.switch };
+  }) : [];
+
+  if (switches.length) {
     const outlet = ch - 1;
     let found = false;
     for (let i = 0; i < switches.length; i += 1) {
@@ -290,6 +306,17 @@ async function controlThingOAuth(cfg, deviceId, state, channel) {
       throw new Error('Channel/outlet not found on device');
     }
     params = { switches: switches };
+  } else {
+    if (ch !== 1) {
+      throw new Error('Device has no multi-channel switches in status');
+    }
+    if (state === 'toggle') {
+      const cur = p && p.switch;
+      const next = cur === 'on' ? 'off' : 'on';
+      params = { switch: next };
+    } else {
+      params = { switch: state };
+    }
   }
 
   const out = await client.device.setThingStatus({
@@ -297,9 +324,32 @@ async function controlThingOAuth(cfg, deviceId, state, channel) {
     id: deviceId,
     params: params,
   });
+  if (logEvent) {
+    logEvent('info', '[sonoff] oauth relay control response', {
+      source: source,
+      deviceId: String(deviceId || ''),
+      channel: ch,
+      params: params,
+      error: out && out.error,
+      msg: out && out.msg ? out.msg : '',
+    });
+  }
   if (out && out.error !== 0) {
     const msg = out.msg || 'Control failed';
+    if (logEvent) {
+      logEvent('error', '[sonoff] oauth relay control failed', {
+        source: source,
+        deviceId: String(deviceId || ''),
+        channel: ch,
+        params: params,
+        error: out.error,
+        msg: msg,
+      });
+    }
     throw new Error(`code ${out.error}: ${msg}`);
+  }
+  if (options && options.percentage != null) {
+    out.requestedPercentage = Number(options.percentage);
   }
   return out;
 }

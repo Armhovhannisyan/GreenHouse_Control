@@ -22,6 +22,30 @@
       <div class="actions-bar" id="pgActionsBar"></div>
       <div class="last-updated">Last refreshed: <span id="pgLastUpdated">—</span></div>
 
+      <section class="pg-drainage-section" aria-label="Daily drainage from InfluxDB">
+        <p class="pg-drainage-error" id="pgDrainageError" hidden></p>
+        <div class="pg-drainage-panels" id="pgDrainagePanels"></div>
+      </section>
+
+      <section class="precision-growing-card pg-grafana-embed" id="data-driven-growing-anchor" hidden>
+        <div class="precision-growing-chart-title">Grafana — live MQTT / Influx</div>
+        <p class="pg-grafana-embed-hint">
+          Embedded dashboard (read-only). If this area is blank, enable anonymous Viewer in Docker Grafana or open Grafana in another tab and sign in, then refresh.
+        </p>
+        <div class="pg-grafana-embed-frame-wrap">
+          <iframe
+            id="pgGrafanaEmbedFrame"
+            title="Grafana dashboard"
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            allow="fullscreen"
+          ></iframe>
+        </div>
+        <div class="pg-grafana-embed-actions">
+          <a class="btn btn-secondary" id="pgGrafanaOpenExternal" href="#" target="_blank" rel="noopener noreferrer">Open in Grafana</a>
+        </div>
+      </section>
+
       <section class="precision-growing-card">
         <div class="precision-growing-chart-title">Plant metrics trend</div>
         <div class="precision-growing-layout">
@@ -47,6 +71,22 @@
             </label>
           </aside>
         </div>
+        <div class="precision-growing-metrics" id="pgLiveMetrics" aria-live="polite">
+          <div class="pg-metric"><span class="pg-metric-label">Leaf temp</span><span class="pg-metric-value font-mono" id="pgMetLeaf">—</span></div>
+          <div class="pg-metric"><span class="pg-metric-label">VPD</span><span class="pg-metric-value font-mono" id="pgMetVpd">—</span></div>
+          <div class="pg-metric"><span class="pg-metric-label">PAR</span><span class="pg-metric-value font-mono" id="pgMetPar">—</span></div>
+          <div class="pg-metric"><span class="pg-metric-label">Slab EC</span><span class="pg-metric-value font-mono" id="pgMetSlabEc">—</span></div>
+          <div class="pg-metric"><span class="pg-metric-label">Plant scale</span><span class="pg-metric-value font-mono" id="pgMetPlantScale">—</span></div>
+          <div class="pg-metric"><span class="pg-metric-label">Slab scale</span><span class="pg-metric-value font-mono" id="pgMetSlabScale">—</span></div>
+          <div class="pg-metric"><span class="pg-metric-label">Canopy air</span><span class="pg-metric-value font-mono" id="pgMetAir">—</span></div>
+          <div class="pg-metric"><span class="pg-metric-label">Canopy RH</span><span class="pg-metric-value font-mono" id="pgMetRh">—</span></div>
+          <div class="pg-metric"><span class="pg-metric-label">Aranet MQTT</span><span class="pg-metric-value font-mono" id="pgMetMqtt">—</span></div>
+        </div>
+        <details class="pg-mqtt-raw-details" id="pgMqttRawDetails">
+          <summary class="pg-mqtt-raw-summary">Raw HiveMQ messages</summary>
+          <p class="pg-mqtt-raw-hint">Topic and payload as received by the backend (newest first). Large payloads are truncated.</p>
+          <div class="pg-mqtt-raw" id="pgMqttRaw" aria-live="polite"></div>
+        </details>
       </section>
     </main>
   </div>

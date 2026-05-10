@@ -16,7 +16,8 @@
  *   SensorAPI.fetchAll(weatherCurrent) → Promise<SensorData>
  *
  * SensorData = {
- *   climate:    { temp, humidity, heating, cooling, indoorProbeName? }
+ *   climate:    { temp, humidity, heating, cooling, indoorProbeName? } — room air from Sonoff/sim/PLC only
+ *   precisionGrowing, mqtt — from /api/sensors/latest (Aranet); never merged into climate
  *   irrigation: { active, waiting }
  *   waterRoom:  { flow, status, recipe }
  *   energyRoom: { temp, mode, program }
@@ -158,21 +159,17 @@ const SensorAPI = (() => {
     if (!payload || typeof payload !== 'object') return sensors;
 
     var out = Object.assign({}, sensors);
-    var climate = Object.assign({}, out.climate || {});
-    var pClimate = payload.climate && typeof payload.climate === 'object' ? payload.climate : null;
-    if (pClimate) {
-      if (pClimate.temp != null && Number.isFinite(Number(pClimate.temp))) climate.temp = Helpers.round(Number(pClimate.temp), 1);
-      if (pClimate.humidity != null && Number.isFinite(Number(pClimate.humidity))) climate.humidity = Math.round(Number(pClimate.humidity));
-      if (pClimate.indoorProbeName) climate.indoorProbeName = String(pClimate.indoorProbeName);
-      if (pClimate.heating) climate.heating = String(pClimate.heating);
-      if (pClimate.cooling) climate.cooling = String(pClimate.cooling);
-    }
-    out.climate = climate;
     if (payload.precisionGrowing && typeof payload.precisionGrowing === 'object') {
       out.precisionGrowing = Object.assign({}, payload.precisionGrowing);
     }
     if (payload.mqtt && typeof payload.mqtt === 'object') {
       out.mqtt = Object.assign({}, payload.mqtt);
+    }
+    if (payload.aranetRoom && typeof payload.aranetRoom === 'object') {
+      out.aranetRoom = Object.assign({}, payload.aranetRoom);
+    }
+    if (payload.raw && typeof payload.raw === 'object') {
+      out.aranetRaw = Object.assign({}, payload.raw);
     }
     return out;
   }
@@ -183,17 +180,16 @@ const SensorAPI = (() => {
 
   /**
    * Fetch all sensor zones.
-   * Tries real endpoints if CONFIG.sensorBaseUrl is set;
-   * falls back to simulation on error or when URL is empty.
+   * If CONFIG.sensorBaseUrl is set, calls that station from the browser.
+   * Otherwise tries GET /api/sensors/station (backend polls SENSOR_STATION_BASE_URL into db),
+   * then simulation.
    *
    * @param {object} weatherCurrent  — current block from WeatherAPI.fetch()
    * @returns {Promise<SensorData>}
    */
   async function fetchAll(weatherCurrent) {
     var base;
-    if (!CONFIG.sensorBaseUrl) {
-      base = simulate(weatherCurrent);
-    } else {
+    if (CONFIG.sensorBaseUrl) {
       try {
         const [climate, irrigation, waterRoom, energyRoom] = await Promise.all([
           fetchClimate(),
@@ -206,10 +202,71 @@ const SensorAPI = (() => {
         console.warn('[SensorAPI] Real fetch failed, using simulation:', err.message);
         base = simulate(weatherCurrent);
       }
+    } else {
+      try {
+        var cached = await getBackendJSON('/api/sensors/station');
+        if (
+          cached &&
+          cached.ok &&
+          cached.climate &&
+          cached.climate.temp != null &&
+          Number.isFinite(Number(cached.climate.temp))
+        ) {
+          base = {
+            climate: {
+              temp: Helpers.round(Number(cached.climate.temp), 1),
+              humidity:
+                cached.climate.humidity != null && Number.isFinite(Number(cached.climate.humidity))
+                  ? Math.round(Number(cached.climate.humidity))
+                  : null,
+              heating: cached.climate.heating || 'No heating',
+              cooling: cached.climate.cooling || 'No cooling',
+            },
+            irrigation: cached.irrigation || { active: 'No valves', waiting: 'No valves' },
+            waterRoom: cached.waterRoom || { flow: 0, status: 'Off', recipe: 1 },
+            energyRoom: cached.energyRoom || { temp: 60, mode: 'Normal', program: 'Off' },
+          };
+        }
+      } catch (_err) {
+        /* fall through to simulation */
+      }
+      if (!base) base = simulate(weatherCurrent);
     }
     var withSonoff = await overlaySonoffClimate(base);
     return overlayBackendAranetSensors(withSonoff);
   }
 
-  return { fetchAll };
+  /**
+   * Daily drainage totals + hourly ml from Influx (requires backend Influx + env field mapping).
+   * Boundaries are Unix ms for local calendar-day windows (typically start/end of yesterday & today).
+   */
+  async function fetchDrainageDaily(yesterdayStartMs, yesterdayEndMs, todayStartMs, todayEndMs) {
+    var base = (CONFIG.backendBaseUrl || '').replace(/\/$/, '');
+    if (!base) throw new Error('Backend URL is not configured');
+    var token = window.localStorage.getItem(TOKEN_KEY) || '';
+    var headers = token ? { Authorization: 'Bearer ' + token } : {};
+    var qs = new URLSearchParams({
+      yesterdayStart: String(yesterdayStartMs),
+      yesterdayEnd: String(yesterdayEndMs),
+      todayStart: String(todayStartMs),
+      todayEnd: String(todayEndMs),
+    });
+    var res = await window.fetch(base + '/api/sensors/drainage-daily?' + qs.toString(), {
+      headers: headers,
+      cache: 'no-store',
+      signal: AbortSignal.timeout(15000),
+    });
+    var body;
+    try {
+      body = await res.json();
+    } catch (_e) {
+      body = { ok: false, error: 'parse', message: 'Invalid response from server' };
+    }
+    if (!res.ok && !body.message) {
+      body = Object.assign({}, body, { ok: false, message: body.message || 'HTTP ' + res.status });
+    }
+    return body;
+  }
+
+  return { fetchAll, fetchDrainageDaily };
 })();
